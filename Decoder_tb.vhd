@@ -34,8 +34,8 @@ architecture Behavioral of Decoder_tb is
      signal          d_funct3_width :  STD_LOGIC_VECTOR (2 downto 0);
      signal         d_vd_vs3 :  STD_LOGIC_VECTOR (4 downto 0);
      signal          d_opcode : STD_LOGIC_VECTOR (6 downto 0);
-    begin
+begin
     
-UUT: Decoder port map (d_vect_inst,d_funct6,d_bit31,d_nf,d_mop,d_vm,d_vs2_rs2,d_rs1,d_funct3_width,d_vd_vs3,d_opcode);
-d_vect_inst<="10101100101011000101010111111111";
+     UUT: Decoder port map (d_vect_inst,d_funct6,d_bit31,d_nf,d_mop,d_vm,d_vs2_rs2,d_rs1,d_funct3_width,d_vd_vs3,d_opcode);
+     d_vect_inst<="10101100101011000101010111111111";
 end Behavioral;

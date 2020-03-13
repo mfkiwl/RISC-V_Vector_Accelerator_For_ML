@@ -1,24 +1,3 @@
-----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
--- 
--- Create Date: 02/29/2020 11:01:30 AM
--- Design Name: 
--- Module Name: Control_Unit_tb - Behavioral
--- Project Name: 
--- Target Devices: 
--- Tool Versions: 
--- Description: 
--- 
--- Dependencies: 
--- 
--- Revision:
--- Revision 0.01 - File Created
--- Additional Comments:
--- 
-----------------------------------------------------------------------------------
-
-
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
@@ -47,11 +26,11 @@ constant        logVLMAX: integer := 5;
 component Controller is
 
     generic (
-        XLEN:integer:=32; --Register width
-        ELEN:integer:=32; --Maximum element width
-        VLEN:integer:=32;
-        SEW_MAX:integer:=5;
-        VLMAX: integer :=32;
+        XLEN:integer:=32; --Register width (implementation defined) 
+        ELEN:integer:=32; --Maximum element width (implementation defined)
+        VLEN:integer:=32; --Vector Length
+        SEW_MAX:integer:=5;  --Max Standard element width 
+        VLMAX: integer :=32; -- Maximum vector length
         logVLMAX: integer := 5
     );
     
@@ -85,7 +64,7 @@ component Controller is
                                                 -- 0 = ALU
                                                 -- 1 = Mem    
     CSR_out: out STD_LOGIC_VECTOR (XLEN-1 downto 0);
-    ---- 1) vtype fields:
+    --vtype fields:
     vill: out STD_LOGIC;
     vediv:out STD_LOGIC_VECTOR (1 downto 0);
     vlmul: out STD_LOGIC_VECTOR(1 downto 0);  
@@ -93,6 +72,7 @@ component Controller is
     vstart: out STD_LOGIC_VECTOR(XLEN-1 downto 0);
     vl: out STD_LOGIC_VECTOR(XLEN-1 downto 0);      
     ------------------------------------------------------------------------
+    --From Decoder:
     funct6 : out STD_LOGIC_VECTOR (5 downto 0);
     nf : out STD_LOGIC_VECTOR (2 downto 0);
     mop : out STD_LOGIC_VECTOR (2 downto 0);
@@ -163,9 +143,9 @@ begin
      rs1_data, rd_data, WriteEn, SrcB, MemWrite, MemRead, WBSrc,
      CSR_out, vill, vediv, vlmul, sew, vstart, vl, 
      funct6, nf, mop, vm, vs2_rs2, rs1, funct3_width, vd_vs3);
-    --Inputs: 
-    --clk_in, busy, CSR_Addr, CSR_WD, cu_funct3, cu_rs1, cu_rs2, cu_rd,cu_opcode,
-    clk_proc: process begin
+        
+    --Inputs: clk_in, busy, CSR_Addr, CSR_WD, cu_funct3, cu_rs1, cu_rs2, cu_rd,cu_opcode,
+    clk_proc: process begin --clock period can be less? How to know good enough clock period?
         clk_in<='1';
         wait for 20ns;
         clk_in<='0'; 
@@ -179,6 +159,7 @@ begin
         CSR_WEN<='0'; CSR_REN<='1'; CSR_Addr<=x"008"; wait for 80ns; 
         -- Case 2: Testing an ALU instruction
         CSR_REN<='0'; vect_inst<="00000000000000000011000001010111";
+        --Case 3: Testing vsetvl
         wait;
     end process;
 

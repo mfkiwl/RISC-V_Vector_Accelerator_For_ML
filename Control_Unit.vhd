@@ -133,11 +133,11 @@ end minimum;
     -- 4  vtype  0xC21
     -- 5  vlenb  0xC22
     signal CSR : registers;
-    signal vtype,vlenb,vstart,vl,vxrm,vxsat: STD_LOGIC_VECTOR(XLEN-1 downto 0 );
+    signal vtype,vlenb,vstart,vl,vxrm,vxsat: STD_LOGIC_VECTOR(XLEN-1 downto 0 );--CSR output signals for readability
 
 begin
     -- set CSR values (implementation-defined)
-    
+    --CSR output signals for readability
     vstart<= CSR(0);
     vxsat<= CSR(1);
     vxrm<= CSR(2);
@@ -149,7 +149,7 @@ begin
     cu_vl <= CSR(3);
     
     
-    --First, we divide vtype to its respective fields        
+    --Divide vtype to its respective fields        
     -- vtype fields:
     cu_vill <= vtype(31);
     --Bits 30 downto 7 are reserved
@@ -163,6 +163,7 @@ begin
     --Process for CSRs
     process (clk_in)
     begin 
+        CSR_out<=(others=>'0'); --prevent accidental latches
     ----------------------------------------------------------
    --Second, we manage the read and write 
         if (rising_edge(clk_in)) then 
@@ -197,7 +198,12 @@ begin
     --Process for Control Signals
     process(clk_in) 
     begin
-                         
+        cu_WriteEn<='0'; --prevent accidental latches
+        cu_MemWrite<='0'; 
+        cu_MemRead<='0';
+        cu_SrcB<="--"; -- (?!)need to make sure that dont cares prevent latches
+        cu_WBSrc<='-';
+        cu_rd_data<= (others=>'0');                  
         if (busy='0' and rising_edge(clk_in)) then
             case cu_opcode is
             --Case 1: ALU Operation
@@ -231,7 +237,11 @@ begin
                                                   --else
                                                   --vsetvli
                                                   end if;
-                                     when others => cu_SrcB<= "--";
+                                     when others => cu_WriteEn<='0';
+                                                    cu_MemWrite<='0'; 
+                                                    cu_MemRead<='0';
+                                                    cu_SrcB<="--";
+                                                    cu_WBSrc<='-'; 
                                  end case;
                                  
             --Case 2: Load Operation

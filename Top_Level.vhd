@@ -196,6 +196,7 @@ end component;
 begin
 
 Dec: Decoder PORT MAP (vect_inst,funct6,bit31_sig,nf,mop,vm,rs2_sig,rs1_sig,funct3_sig,rd_sig,opcode_sig);
+
 CU:  Control_Unit 
 GENERIC MAP(XLEN,ELEN,VLEN,SEW_MAX,VLMAX,logVLMAX)
 PORT MAP (clk_in,busy,CSR_Addr,CSR_WD,CSR_WEN, CSR_REN, CSR_out,vill,vediv,vlmul,sew,vstart,vl,funct3_sig,rs1_sig,rs2_sig,rd_sig,opcode_sig,bit31_sig,rs1_data,rd_data,WriteEn,SrcB,MemWrite,MemRead,WBSrc);

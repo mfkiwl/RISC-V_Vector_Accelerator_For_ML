@@ -43,6 +43,7 @@ end Decoder;
 architecture Behavioral of Decoder is 
     begin
         d_funct6<=d_vect_inst(31 downto 26);
+        d_bit31<=d_vect_inst(31);
         d_nf<=d_vect_inst(31 downto 29);
         d_mop<=d_vect_inst(28 downto 26);
         d_vm<=d_vect_inst(25);
@@ -51,6 +52,5 @@ architecture Behavioral of Decoder is
         d_funct3_width<=d_vect_inst(14 downto 12);
         d_vd_vs3<=d_vect_inst(11 downto 7);
         d_opcode<=d_vect_inst(6 downto 0);
-        d_bit31<=d_vect_inst(31);
 
 end Behavioral;

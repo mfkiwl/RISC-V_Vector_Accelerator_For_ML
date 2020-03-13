@@ -1,32 +1,11 @@
-----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
--- 
--- Create Date: 02/10/2020 10:25:22 AM
--- Design Name: 
--- Module Name: Decoder - Behavioral
--- Project Name: 
--- Target Devices: 
--- Tool Versions: 
--- Description: 
--- 
--- Dependencies: 
--- 
--- Revision:
--- Revision 0.01 - File Created
--- Additional Comments:
--- 
-----------------------------------------------------------------------------------
-
-
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
---The decoder divides the incoming vector instructions into the respective fields
+--The decoder divides the incoming vector instructions into the respective fields (based on RISC-V vector spec)
 
 entity Decoder is
     Port ( d_vect_inst : in STD_LOGIC_VECTOR (31 downto 0);
-           -- Instruction Fields:
+           -- Instruction Fields: (for ALU and memory)
            d_funct6 : out STD_LOGIC_VECTOR (5 downto 0);
            d_bit31: out STD_LOGIC; -- used for vsetvl,vsetvli instructions
            d_nf : out STD_LOGIC_VECTOR (2 downto 0);

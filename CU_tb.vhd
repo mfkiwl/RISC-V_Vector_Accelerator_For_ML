@@ -1,15 +1,5 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
-
--- Uncomment the following library declaration if instantiating
--- any Xilinx leaf cells in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
-
 entity CU_tb is
 --  Port ( );
 end CU_tb;
@@ -88,10 +78,10 @@ component Control_Unit is
                                     -- 10 = immediate
                                     -- 00 = ??
            cu_MemWrite : out STD_LOGIC;-- enables write to memory
-           cu_MemRead: out STD_LOGIC; -- enables read from memory
-           cu_WBSrc : out STD_LOGIC);-- selects if wrbsc is from ALU or mem 
-                                     -- 0 = ALU
-                                     -- 1 = Mem
+           cu_MemRead: out STD_LOGIC;  -- enables read from memory
+           cu_WBSrc : out STD_LOGIC);  -- selects if wrbsc is from ALU or mem 
+                                       -- 0 = ALU
+                                       -- 1 = Mem
            --------------------------------------------
 end component;
 

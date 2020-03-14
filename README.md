@@ -3,7 +3,7 @@
 RISC-V implementation of a vector unit that will eventually be used to accelerate Machine Learning algorithms.
 
 --------------------------------------------------------------------
-                           SPECIFICATIONS      
+                                    SPECIFICATIONS      
 --------------------------------------------------------------------
 1. Controller
    - Decoder: decodes vector instruction into fields

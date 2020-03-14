@@ -1,14 +1,6 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use ieee.numeric_std.all;
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
-
--- Uncomment the following library declaration if instantiating
--- any Xilinx leaf cells in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
 
 -- Each bank has 2 read ports and 2 write ports.
 --Bypass is also implemented
@@ -50,7 +42,7 @@ begin
     sew_int<= to_integer(unsigned(sew)); --convert sew to integer for reading
     process(clk) is
     begin
-          if(busy='0') then read_counter<=0; write_counter<=0; end if; --new instruction, reset counters
+          if(busy='0') then read_counter<=0; write_counter<=0; end if; --Upon new instruction, reset counters
           if rising_edge(clk) then 
               if WriteEn = '1' then
                 --Write

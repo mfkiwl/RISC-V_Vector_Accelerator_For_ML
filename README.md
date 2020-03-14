@@ -3,7 +3,7 @@
 RISC-V implementation of a vector unit that will eventually be used to accelerate Machine Learning algorithms.
 
 --------------------------------------------------------------------
---------------------      SPECIFICATIONS      ----------------------
+                           SPECIFICATIONS      
 --------------------------------------------------------------------
 1. Controller
    - Decoder: decodes vector instruction into fields
@@ -17,5 +17,3 @@ RISC-V implementation of a vector unit that will eventually be used to accelerat
    - 2 Lanes
    - Supports chaining
    
--Register File with 2 banks with 2 read ports and 1 write port each. 
--2 execution lanes with support for chaining.

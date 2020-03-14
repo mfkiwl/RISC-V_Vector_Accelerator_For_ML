@@ -18,24 +18,36 @@ entity Bank1 is
              );
     Port ( clk : in STD_LOGIC;
            busy: in STD_LOGIC;
+           WriteEn : in STD_LOGIC;                        -- Write Enable signal
+           sew: in STD_LOGIC_VECTOR (SEW_MAX-1 downto 0); -- standard element width in bits
+           vl: in STD_LOGIC_VECTOR(XLEN-1 downto 0) ;     -- vector length in bits
+          ------------------------------------------------------
+          -- Read Outputs
            outA : out STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
            outB : out STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
+          ------------------------------------------------------
+          -- Registers to read from
            RegSelA : in STD_LOGIC_VECTOR (RegNum-1 downto 0);
            RegSelB : in STD_LOGIC_VECTOR (RegNum-1 downto 0);
-           WriteEn : in STD_LOGIC;
-           WriteData1 : in STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
-           WriteData2 : in STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
+          ------------------------------------------------------
+          -- Registers to write to
            WriteDest1 : in STD_LOGIC_VECTOR (RegNum-1 downto 0);
            WriteDest2 : in STD_LOGIC_VECTOR (RegNum-1 downto 0);
-           sew: in STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
-           vl: in STD_LOGIC_VECTOR(XLEN-1 downto 0) 
+           ------------------------------------------------------
+          -- Data to write
+           WriteData1 : in STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
+           WriteData2 : in STD_LOGIC_VECTOR (SEW_MAX-1 downto 0)
            );
 end Bank1;
 
 architecture Behavioral of Bank1 is
+    ------------------------------------------------------
+    -- Instantiate Register file 
     type registerFile is array(0 to (2**(RegNum)-1)) of std_logic_vector(VLMAX-1 downto 0);   
     signal registers : registerFile;
     signal sew_int: integer;
+    ------------------------------------------------------
+    -- Counters
     signal read_counter: integer range 0 to (VLMAX-1):=0; 
     signal write_counter: integer range 0 to (VLMAX-1):=0;
 begin

@@ -76,13 +76,32 @@ begin
     
     process(clk) is
     --variable sign_ext : std_logic_vector ( (VLEN-sew_int) downto 0) := (others=>'0');
-    
     begin
           if rising_edge(clk) then 
               if(newInst = '1') then elements_read<=0; elements_written<=0; read_counter<=0; write_counter<=0; busy<='1'; end if; --new instruction from dispatcher, reset counters
+              
+              -- reading
+              if(elements_read < vl_int) then
+                --Bypass logic
+                if ( RegSelA = WriteDest AND read_counter=write_counter) then
+                    outA<=WriteData; --Bypass Data1 to read port A
+                else
+                    outA<= ( x"000000" & (registers(to_integer(unsigned(RegSelA))) ((read_counter+sew_int-1) downto read_counter) ));
+                end if; 
+                
+                if ( RegSelB = WriteDest AND read_counter=write_counter) then
+                    outB<=WriteData; --Bypass Data1 to read port B 
+                else
+                    outB<= ( x"000000" & (registers(to_integer(unsigned(RegSelB))) ((read_counter+sew_int-1) downto read_counter) ));                    
+                end if;
+                read_counter<= read_counter+sew_int;
+                elements_read<= elements_read+1;
+              end if;
+              
+              
               if WriteEn = '1' then
                 --Write 
-                if(elements_written < vl_int-1) then
+                if(elements_written < vl_int) then
                     registers(to_integer(unsigned(WriteDest)))((write_counter+sew_int-1) downto write_counter)<=WriteData(sew_int-1 downto 0);  
                     write_counter<= write_counter+sew_int;
                     elements_written<= elements_written+1;
@@ -91,17 +110,6 @@ begin
                 end if;
               end if;
               
-              --Read A and B
-               
-              
-              
-              --increment read counter
-              if(elements_read < vl_int-1) then
-                outA<= ( x"000000" & (registers(to_integer(unsigned(RegSelA))) ((read_counter+sew_int-1) downto read_counter) ));
-                outB<= ( x"000000" & (registers(to_integer(unsigned(RegSelB))) ((read_counter+sew_int-1) downto read_counter) ));
-                read_counter<= read_counter+sew_int;
-                elements_read<= elements_read+1;
-              end if;
            end if;
     end process;
 end Bank1_arch;

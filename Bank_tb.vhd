@@ -97,8 +97,8 @@ begin
     end process;
     
     process begin
-        wait for 5ns; newInst<='1'; sew <= "01000"; vl <= x"00000004"; wait for 5ns;
-        newInst <= '0'; WriteEn<='1'; WriteData<= x"00000004"; WriteDest<="00000"; RegSelA<="00000"; RegSelB<="00001";  wait for 10ns;
+        wait for 10ns; newInst<='1'; sew <= "01000"; vl <= x"00000004"; wait for 10ns;
+        newInst <= '0'; WriteEn<='1'; WriteData<= x"00000004"; WriteDest<="00000"; RegSelA<="00000"; RegSelB<="00001"; wait for 10ns;
         WriteData<= x"00000005";  wait for 10ns;
         WriteData<= x"00000006"; wait for 10ns;
         WriteData<= x"00000007";  wait for 10ns;

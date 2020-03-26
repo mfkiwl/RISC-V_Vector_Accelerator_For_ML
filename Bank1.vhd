@@ -66,65 +66,56 @@ architecture Bank1_arch of Bank1 is
     signal registers : registerFile;
     signal sew_int: integer;
     signal vl_int: integer;
-    signal read_counter: integer range 0 to (VLEN-1):=0; -- first bit to read from
-    signal write_counter: integer range 0 to (VLEN-1):=0; -- first bit to write to
-    signal elements_read: integer range 0 to (VLMAX-1):=0; -- # of elements read so far
-    signal elements_written: integer range 0 to (VLMAX-1):=0; -- # of elements written so far
+    
 begin
     sew_int<= to_integer(unsigned(sew)); --convert sew to integer for reading
     vl_int<= to_integer(unsigned(vl)); --convert vl to integer
     
     process(clk) is
     --variable sign_ext : std_logic_vector ( (VLEN-sew_int) downto 0) := (others=>'0');
+    variable read_counter: integer range 0 to (VLEN-1):=0; -- first bit to read from
+    variable write_counter: integer range 0 to (VLEN-1):=0; -- first bit to write to
+    variable elements_read: integer range 0 to (VLMAX-1):=0; -- # of elements read so far
+    variable elements_written: integer range 0 to (VLMAX-1):=0; -- # of elements written so far
     begin
-          if rising_edge(clk) then 
-              if(newInst = '1') then elements_read<=0; elements_written<=0; read_counter<=0; write_counter<=0; busy<='1'; end if; --new instruction from dispatcher, reset counters
-              
-              -- reading
-              if(elements_read < vl_int) then
-                --Bypass logic
-                if ( RegSelA = WriteDest AND read_counter=write_counter) then
-                    outA<=WriteData; --Bypass Data1 to read port A
-                else
-                    outA<= ( x"000000" & (registers(to_integer(unsigned(RegSelA))) ((read_counter+sew_int-1) downto read_counter) ));
-                end if; 
-                
-                if ( RegSelB = WriteDest AND read_counter=write_counter) then
-                    outB<=WriteData; --Bypass Data1 to read port B 
-                else
-                    outB<= ( x"000000" & (registers(to_integer(unsigned(RegSelB))) ((read_counter+sew_int-1) downto read_counter) ));                    
-                end if;
-                read_counter<= read_counter+sew_int;
-                elements_read<= elements_read+1;
-              end if;
-              
-              
-              if WriteEn = '1' then
+        if(newInst = '1') then elements_read:=0; elements_written:=0; read_counter:=0; write_counter:=0; busy<='1'; end if; --new instruction from dispatcher, reset counters
+
+        if rising_edge(clk) then                                 
+            if WriteEn = '1' then
                 --Write 
                 if(elements_written < vl_int) then
                     registers(to_integer(unsigned(WriteDest)))((write_counter+sew_int-1) downto write_counter)<=WriteData(sew_int-1 downto 0);  
-                    write_counter<= write_counter+sew_int;
-                    elements_written<= elements_written+1;
+                    write_counter:= write_counter+sew_int;
+                    elements_written:= elements_written+1;
                 else --reached VL limit, so notify dispatcher that done.
                     busy<= '0';
                 end if;
-              end if;
-              
-           end if;
+            end if;
+        elsif falling_edge(clk) then
+            if(elements_read < vl_int) then
+                outA<= ( x"000000" & (registers(to_integer(unsigned(RegSelA))) ((read_counter+sew_int-1) downto read_counter) ));
+                outB<= ( x"000000" & (registers(to_integer(unsigned(RegSelB))) ((read_counter+sew_int-1) downto read_counter) ));                    
+                read_counter:= read_counter+sew_int;
+                elements_read:= elements_read+1;
+            end if;
+        end if;
     end process;
 end Bank1_arch;
 
---                   --Bypass logic
---                   if RegSelA = WriteDest1 then
---                    outA<=WriteData1; --Bypass Data1 to read port A
-                    
---                   elsif RegSelA = WriteDest2 then
---                    outA<=WriteData2; --Bypass Data2 to read port A
-                    
---                   elsif RegSelB = WriteDest1 then
---                    outB<=WriteData1; --Bypass Data1 to read port B
-                    
---                   elsif RegSelB = WriteDest2 then
---                    outB<=WriteData2; --Bypass Data2 to read port B 
-                                     
---                   end if;
+-- reading
+--              if(elements_read < vl_int) then
+--                --Bypass logic
+--                if ( RegSelA = WriteDest AND read_counter=write_counter) then
+--                    outA<=WriteData; --Bypass Data1 to read port A
+--                else
+--                    outA<= ( x"000000" & (registers(to_integer(unsigned(RegSelA))) ((read_counter+sew_int-1) downto read_counter) ));
+--                end if; 
+                
+--                if ( RegSelB = WriteDest AND read_counter=write_counter) then
+--                    outB<=WriteData; --Bypass Data1 to read port B 
+--                else
+--                    outB<= ( x"000000" & (registers(to_integer(unsigned(RegSelB))) ((read_counter+sew_int-1) downto read_counter) ));                    
+--                end if;
+--                read_counter:= read_counter+sew_int;
+--                elements_read:= elements_read+1;
+--              end if;

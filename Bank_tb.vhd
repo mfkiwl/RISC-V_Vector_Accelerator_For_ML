@@ -97,12 +97,23 @@ begin
     end process;
     
     process begin
-        wait for 10ns; newInst<='1'; sew <= "01000"; vl <= x"00000004"; wait for 10ns;
-        newInst <= '0'; WriteEn<='1'; WriteData<= x"00000004"; WriteDest<="00000"; RegSelA<="00000"; RegSelB<="00001"; wait for 10ns;
+        newInst<='0'; sew <= "01000"; vl <= x"00000004"; WriteEn<='1'; WriteData<= x"00000004"; WriteDest<="00000"; RegSelA<="00000"; RegSelB<="00001";
+        wait for 10ns; newInst<='1'; wait for 5ns; newInst<= '0'; wait for 5ns;
         WriteData<= x"00000005";  wait for 10ns;
         WriteData<= x"00000006"; wait for 10ns;
-        WriteData<= x"00000007";  wait for 10ns;
+        WriteData<= x"00000007";  wait for 30ns;
         --WriteData<= x"00000008"; RegSelA<="00000";  wait for 20ns; 
-        WriteEn<= '0'; newInst<= '1'; wait;
+        newInst<= '1'; WriteData<= x"00000008"; wait for 5ns; newInst<= '0'; wait for 5ns; 
+        WriteData<= x"00000009";  wait for 10ns;
+        WriteData<= x"0000000A"; wait for 10ns;
+        WriteData<= x"0000000B";  wait for 10ns;
+        wait;
     end process;
+    
+--    newInst<='0', '1' after 10ns, '0' after 15ns;
+--    sew <= "01000"; vl <= x"00000004"; 
+--    WriteEn<='1';  WriteDest<="00000";
+--    RegSelA<="00000"; RegSelB<="00001";
+--    WriteData<= x"00000004", x"00000005" after 20ns, x"00000006" after 30ns, x"00000007" after 40ns;
+    
 end Behavioral;

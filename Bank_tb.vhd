@@ -101,7 +101,7 @@ begin
         wait for 10ns; newInst<='1'; wait for 5ns; newInst<= '0'; wait for 5ns;
         WriteData<= x"00000005";  wait for 10ns;
         WriteData<= x"00000006"; wait for 10ns;
-        WriteData<= x"00000007";  wait for 30ns;
+        WriteData<= x"FFFFFFF7";  wait for 30ns;
         --WriteData<= x"00000008"; RegSelA<="00000";  wait for 20ns; 
         newInst<= '1'; WriteData<= x"00000008"; wait for 5ns; newInst<= '0'; wait for 5ns; 
         WriteData<= x"00000009";  wait for 10ns;

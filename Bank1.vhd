@@ -64,6 +64,7 @@ end Bank1;
 architecture Bank1_arch of Bank1 is
     type registerFile is array(0 to (2**(RegNum)-1)) of std_logic_vector(VLEN-1 downto 0);   
     signal registers : registerFile;
+
     signal sew_int: integer;
     signal vl_int: integer;
     
@@ -72,11 +73,10 @@ begin
     vl_int<= to_integer(unsigned(vl)); --convert vl to integer
     
     process(clk) is
-    --variable sign_ext : std_logic_vector ( (VLEN-sew_int) downto 0) := (others=>'0');
-    variable read_counter: integer range 0 to (VLEN-1):=0; -- first bit to read from
-    variable write_counter: integer range 0 to (VLEN-1):=0; -- first bit to write to
-    variable elements_read: integer range 0 to (VLMAX-1):=0; -- # of elements read so far
-    variable elements_written: integer range 0 to (VLMAX-1):=0; -- # of elements written so far
+        variable read_counter: integer range 0 to (VLEN-1):=0; -- first bit to read from
+        variable write_counter: integer range 0 to (VLEN-1):=0; -- first bit to write to
+        variable elements_read: integer range 0 to (VLMAX-1):=0; -- # of elements read so far
+        variable elements_written: integer range 0 to (VLMAX-1):=0; -- # of elements written so far
     begin
         if(newInst = '1') then elements_read:=0; elements_written:=0; read_counter:=0; write_counter:=0; busy<='1'; end if; --new instruction from dispatcher, reset counters
 
@@ -93,29 +93,11 @@ begin
             end if;
         elsif falling_edge(clk) then
             if(elements_read < vl_int) then
-                outA<= ( x"000000" & (registers(to_integer(unsigned(RegSelA))) ((read_counter+sew_int-1) downto read_counter) ));
-                outB<= ( x"000000" & (registers(to_integer(unsigned(RegSelB))) ((read_counter+sew_int-1) downto read_counter) ));                    
+                outA<= std_logic_vector(resize( signed((registers(to_integer(unsigned(RegSelA))) ((read_counter+sew_int-1) downto read_counter)) ), outA'length));
+                outB<= std_logic_vector(resize( signed((registers(to_integer(unsigned(RegSelB))) ((read_counter+sew_int-1) downto read_counter)) ), outB'length));
                 read_counter:= read_counter+sew_int;
                 elements_read:= elements_read+1;
             end if;
         end if;
     end process;
 end Bank1_arch;
-
--- reading
---              if(elements_read < vl_int) then
---                --Bypass logic
---                if ( RegSelA = WriteDest AND read_counter=write_counter) then
---                    outA<=WriteData; --Bypass Data1 to read port A
---                else
---                    outA<= ( x"000000" & (registers(to_integer(unsigned(RegSelA))) ((read_counter+sew_int-1) downto read_counter) ));
---                end if; 
-                
---                if ( RegSelB = WriteDest AND read_counter=write_counter) then
---                    outB<=WriteData; --Bypass Data1 to read port B 
---                else
---                    outB<= ( x"000000" & (registers(to_integer(unsigned(RegSelB))) ((read_counter+sew_int-1) downto read_counter) ));                    
---                end if;
---                read_counter:= read_counter+sew_int;
---                elements_read:= elements_read+1;
---              end if;

@@ -33,7 +33,7 @@ use ieee.numeric_std.all;
 
 -- Each bank has 2 read ports and 2 write ports.
 --Bypass is also implemented
-entity Bank1 is
+entity Bank is
 
     generic (
            -- Max Vector Length (max number of elements) 
@@ -48,21 +48,20 @@ entity Bank1 is
              );
     Port ( clk : in STD_LOGIC;
            newInst: in STD_LOGIC;
-           busy: out STD_LOGIC;
-           outA : out STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
-           outB : out STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
-           RegSelA : in STD_LOGIC_VECTOR (RegNum-1 downto 0);
-           RegSelB : in STD_LOGIC_VECTOR (RegNum-1 downto 0);
+           out1 : out STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
+           out2 : out STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
+           RegSel1 : in STD_LOGIC_VECTOR (RegNum-2 downto 0);
+           RegSel2 : in STD_LOGIC_VECTOR (RegNum-2 downto 0);
            WriteEn : in STD_LOGIC;
            WriteData : in STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
-           WriteDest : in STD_LOGIC_VECTOR (RegNum-1 downto 0);
+           WriteDest : in STD_LOGIC_VECTOR (RegNum-2 downto 0);
            sew: in STD_LOGIC_VECTOR (lgSEW_MAX-1 downto 0);
            vl: in STD_LOGIC_VECTOR(XLEN-1 downto 0) 
            );
-end Bank1;
+end Bank;
 
-architecture Bank1_arch of Bank1 is
-    type registerFile is array(0 to (2**(RegNum)-1)) of std_logic_vector(VLEN-1 downto 0);   
+architecture Bank_arch of Bank is
+    type registerFile is array(0 to (2**(RegNum-1)-1)) of std_logic_vector(VLEN-1 downto 0);   
     signal registers : registerFile;
 
     signal sew_int: integer;
@@ -78,7 +77,7 @@ begin
         variable elements_read: integer range 0 to (VLMAX-1):=0; -- # of elements read so far
         variable elements_written: integer range 0 to (VLMAX-1):=0; -- # of elements written so far
     begin
-        if(newInst = '1') then elements_read:=0; elements_written:=0; read_counter:=0; write_counter:=0; busy<='1'; end if; --new instruction from dispatcher, reset counters
+        if(newInst = '1') then elements_read:=0; elements_written:=0; read_counter:=0; write_counter:=0; end if; --new instruction from dispatcher, reset counters
 
         if rising_edge(clk) then                                 
             if WriteEn = '1' then
@@ -87,17 +86,15 @@ begin
                     registers(to_integer(unsigned(WriteDest)))((write_counter+sew_int-1) downto write_counter)<=WriteData(sew_int-1 downto 0);  
                     write_counter:= write_counter+sew_int;
                     elements_written:= elements_written+1;
-                else --reached VL limit, so notify dispatcher that done.
-                    busy<= '0';
                 end if;
             end if;
         elsif falling_edge(clk) then
             if(elements_read < vl_int) then
-                outA<= std_logic_vector(resize( signed((registers(to_integer(unsigned(RegSelA))) ((read_counter+sew_int-1) downto read_counter)) ), outA'length));
-                outB<= std_logic_vector(resize( signed((registers(to_integer(unsigned(RegSelB))) ((read_counter+sew_int-1) downto read_counter)) ), outB'length));
+                out1<= std_logic_vector(resize( signed((registers(to_integer(unsigned(RegSel1))) ((read_counter+sew_int-1) downto read_counter)) ), out1'length));
+                out2<= std_logic_vector(resize( signed((registers(to_integer(unsigned(RegSel2))) ((read_counter+sew_int-1) downto read_counter)) ), out2'length));
                 read_counter:= read_counter+sew_int;
                 elements_read:= elements_read+1;
             end if;
         end if;
     end process;
-end Bank1_arch;
+end Bank_arch;

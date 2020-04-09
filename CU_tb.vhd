@@ -1,5 +1,36 @@
+----------------------------------------------------------------------------------
+-- Company: 
+-- Engineer: 
+-- 
+-- Create Date: 02/29/2020 11:01:30 AM
+-- Design Name: 
+-- Module Name: Control_Unit_tb - Behavioral
+-- Project Name: 
+-- Target Devices: 
+-- Tool Versions: 
+-- Description: 
+-- 
+-- Dependencies: 
+-- 
+-- Revision:
+-- Revision 0.01 - File Created
+-- Additional Comments:
+-- 
+----------------------------------------------------------------------------------
+
+
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
+
+-- Uncomment the following library declaration if using
+-- arithmetic functions with Signed or Unsigned values
+--use IEEE.NUMERIC_STD.ALL;
+
+-- Uncomment the following library declaration if instantiating
+-- any Xilinx leaf cells in this code.
+--library UNISIM;
+--use UNISIM.VComponents.all;
+
 entity CU_tb is
 --  Port ( );
 end CU_tb;
@@ -9,7 +40,8 @@ architecture Behavioral of CU_tb is
 constant        XLEN:integer:=32; --Register width
 constant        ELEN:integer:=32; --Maximum element width
 constant        VLEN:integer:=32;
-constant        SEW_MAX:integer:=5;
+constant        SEW_MAX:integer:=32;
+constant        lgSEW_MAX: integer:=5;
 constant        VLMAX: integer :=32;
 constant        logVLMAX: integer := 5;
 
@@ -19,7 +51,8 @@ component Control_Unit is
         XLEN:integer:=32; --Register width
         ELEN:integer:=32; --Maximum element width
         VLEN:integer:=32;
-        SEW_MAX:integer:=5;
+        SEW_MAX: integer:=32;
+        lgSEW_MAX: integer:=5;
         VLMAX: integer :=32;
         logVLMAX: integer := 5
     );
@@ -45,7 +78,7 @@ component Control_Unit is
            cu_vill: out STD_LOGIC;
            cu_vediv:out STD_LOGIC_VECTOR (1 downto 0);
            cu_vlmul: out STD_LOGIC_VECTOR(1 downto 0);  
-           cu_sew: out STD_LOGIC_VECTOR (SEW_MAX-1 downto 0); 
+           cu_sew: out STD_LOGIC_VECTOR (lgSEW_MAX-1 downto 0); 
            --- 2) vlenb fields:
            --vlenb has no fields; it is a read only register of value VLEN/8
            
@@ -78,10 +111,10 @@ component Control_Unit is
                                     -- 10 = immediate
                                     -- 00 = ??
            cu_MemWrite : out STD_LOGIC;-- enables write to memory
-           cu_MemRead: out STD_LOGIC;  -- enables read from memory
-           cu_WBSrc : out STD_LOGIC);  -- selects if wrbsc is from ALU or mem 
-                                       -- 0 = ALU
-                                       -- 1 = Mem
+           cu_MemRead: out STD_LOGIC; -- enables read from memory
+           cu_WBSrc : out STD_LOGIC);-- selects if wrbsc is from ALU or mem 
+                                     -- 0 = ALU
+                                     -- 1 = Mem
            --------------------------------------------
 end component;
 
@@ -102,7 +135,7 @@ end component;
  signal         vill:  STD_LOGIC;
  signal         vediv: STD_LOGIC_VECTOR (1 downto 0);
  signal         vlmul:  STD_LOGIC_VECTOR(1 downto 0);  
- signal         sew:  STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
+ signal         sew:  STD_LOGIC_VECTOR (lgSEW_MAX-1 downto 0);
   -------------------------------------------------------------
  signal         vstart: STD_LOGIC_VECTOR(XLEN-1 downto 0);
  signal         vl: STD_LOGIC_VECTOR(XLEN-1 downto 0);  
@@ -135,7 +168,7 @@ end component;
 begin
 
     G1: Control_Unit
-    GENERIC MAP(XLEN,ELEN,VLEN,SEW_MAX,VLMAX,logVLMAX)
+    GENERIC MAP(XLEN,ELEN,VLEN,SEW_MAX,lgSEW_MAX,VLMAX,logVLMAX)
     PORT MAP(clk_in,busy,
      CSR_ADDR, CSR_WD, CSR_WEN, CSR_REN,
      CSR_out, vill, vediv, vlmul, sew, vstart, vl, 
@@ -157,7 +190,8 @@ begin
         CSR_Addr<=x"008"; CSR_WD<=x"00000001"; CSR_WEN<='1'; wait for 80ns;
         CSR_WEN<='0'; CSR_REN<='1'; CSR_Addr<=x"008"; wait for 40ns; CSR_REN<='0';
         -- Case 2: Testing an ALU instruction
-        wait for 40ns; funct3<= "011"; rs1<= "00000"; rs2 <= "00000"; rd<= "00000"; opcode<="1010111"; bit31<='0';
+        wait for 40ns; funct3<= "011"; rs1<= "00000"; rs2 <= "00000"; rd<= "00000"; opcode<="1010111"; bit31<='0'; wait for 40ns; 
+        funct3<= "111"; rs1<= "00001"; bit31<='1'; rs1_data<= x"00000021"; 
         wait;
     end process;
 

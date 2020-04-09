@@ -56,7 +56,8 @@ entity Bank is
            WriteData : in STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
            WriteDest : in STD_LOGIC_VECTOR (RegNum-2 downto 0);
            sew: in STD_LOGIC_VECTOR (lgSEW_MAX-1 downto 0);
-           vl: in STD_LOGIC_VECTOR(XLEN-1 downto 0) 
+           vl: in STD_LOGIC_VECTOR(XLEN-1 downto 0);
+           vstart: in STD_LOGIC_VECTOR(XLEN-1 downto 0)
            );
 end Bank;
 
@@ -72,12 +73,12 @@ begin
     vl_int<= to_integer(unsigned(vl)); --convert vl to integer
     
     process(clk) is
-        variable read_counter: integer range 0 to (VLEN-1):=0; -- first bit to read from
-        variable write_counter: integer range 0 to (VLEN-1):=0; -- first bit to write to
-        variable elements_read: integer range 0 to (VLMAX-1):=0; -- # of elements read so far
-        variable elements_written: integer range 0 to (VLMAX-1):=0; -- # of elements written so far
+        variable read_counter: integer range 0 to (VLEN-1); -- first bit to read from
+        variable write_counter: integer range 0 to (VLEN-1); -- first bit to write to
+        variable elements_read: integer range 0 to (VLMAX-1); -- # of elements read so far
+        variable elements_written: integer range 0 to (VLMAX-1); -- # of elements written so far
     begin
-        if(newInst = '1') then elements_read:=0; elements_written:=0; read_counter:=0; write_counter:=0; end if; --new instruction from dispatcher, reset counters
+        if(newInst = '1') then elements_read:=to_integer(unsigned(vstart)); elements_written:=to_integer(unsigned(vstart)); read_counter:=to_integer(unsigned(vstart))*sew_int; write_counter:=to_integer(unsigned(vstart))*sew_int; end if; --new instruction from dispatcher, reset counters
 
         if rising_edge(clk) then                                 
             if WriteEn = '1' then

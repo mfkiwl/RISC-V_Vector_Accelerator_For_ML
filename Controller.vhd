@@ -1,5 +1,35 @@
+----------------------------------------------------------------------------------
+-- Company: 
+-- Engineer: 
+-- 
+-- Create Date: 02/29/2020 11:22:56 AM
+-- Design Name: 
+-- Module Name: Top_Level - Behavioral
+-- Project Name: 
+-- Target Devices: 
+-- Tool Versions: 
+-- Description: 
+-- 
+-- Dependencies: 
+-- 
+-- Revision:
+-- Revision 0.01 - File Created
+-- Additional Comments:
+-- 
+----------------------------------------------------------------------------------
+
+
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
+
+-- Uncomment the following library declaration if using
+-- arithmetic functions with Signed or Unsigned values
+--use IEEE.NUMERIC_STD.ALL;
+
+-- Uncomment the following library declaration if instantiating
+-- any Xilinx leaf cells in this code.
+--library UNISIM;
+--use UNISIM.VComponents.all;
 
 entity Controller is
 
@@ -7,7 +37,8 @@ entity Controller is
         XLEN:integer:=32; --Register width
         ELEN:integer:=32; --Maximum element width
         VLEN:integer:=32;
-        SEW_MAX:integer:=5;
+        SEW_MAX: integer:=32;
+        lgSEW_MAX: integer:=5;
         VLMAX: integer :=32;
         logVLMAX: integer := 5
     );
@@ -46,7 +77,7 @@ entity Controller is
     vill: out STD_LOGIC;
     vediv:out STD_LOGIC_VECTOR (1 downto 0);
     vlmul: out STD_LOGIC_VECTOR(1 downto 0);  
-    sew: out STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
+    sew: out STD_LOGIC_VECTOR (lgSEW_MAX-1 downto 0);
     vstart: out STD_LOGIC_VECTOR(XLEN-1 downto 0);
     vl: out STD_LOGIC_VECTOR(XLEN-1 downto 0);      
     ------------------------------------------------------------------------
@@ -69,7 +100,8 @@ component Control_Unit is
         XLEN:integer:=32; --Register width
         ELEN:integer:=32; --Maximum element width
         VLEN:integer:=32;
-        SEW_MAX:integer:=5;
+        SEW_MAX: integer:=32;
+        lgSEW_MAX: integer:=5;
         VLMAX: integer :=32;
         logVLMAX: integer := 5
     );
@@ -95,7 +127,7 @@ component Control_Unit is
            cu_vill: out STD_LOGIC;
            cu_vediv:out STD_LOGIC_VECTOR (1 downto 0);
            cu_vlmul: out STD_LOGIC_VECTOR(1 downto 0);  
-           cu_sew: out STD_LOGIC_VECTOR (SEW_MAX-1 downto 0); 
+           cu_sew: out STD_LOGIC_VECTOR (lgSEW_MAX-1 downto 0); 
            --- 2) vlenb fields:
            --vlenb has no fields; it is a read only register of value VLEN/8
            
@@ -168,7 +200,7 @@ begin
 Dec: Decoder PORT MAP (vect_inst,funct6,bit31_sig,nf,mop,vm,rs2_sig,rs1_sig,funct3_sig,rd_sig,opcode_sig);
 
 CU:  Control_Unit 
-GENERIC MAP(XLEN,ELEN,VLEN,SEW_MAX,VLMAX,logVLMAX)
+GENERIC MAP(XLEN,ELEN,VLEN,SEW_MAX,lgSEW_MAX,VLMAX,logVLMAX)
 PORT MAP (clk_in,busy,CSR_Addr,CSR_WD,CSR_WEN, CSR_REN, CSR_out,vill,vediv,vlmul,sew,vstart,vl,funct3_sig,rs1_sig,rs2_sig,rd_sig,opcode_sig,bit31_sig,rs1_data,rd_data,WriteEn,SrcB,MemWrite,MemRead,WBSrc);
 
 funct3_width<=funct3_sig;

@@ -66,7 +66,8 @@ component Bank is
            WriteData : in STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
            WriteDest : in STD_LOGIC_VECTOR (RegNum-2 downto 0);
            sew: in STD_LOGIC_VECTOR (lgSEW_MAX-1 downto 0);
-           vl: in STD_LOGIC_VECTOR(XLEN-1 downto 0) 
+           vl: in STD_LOGIC_VECTOR(XLEN-1 downto 0);
+           vstart: in STD_LOGIC_VECTOR(XLEN-1 downto 0) 
            );
 end component;
 
@@ -80,11 +81,12 @@ signal     WriteEn : STD_LOGIC;
 signal     WriteData : STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
 signal     WriteDest : STD_LOGIC_VECTOR (RegNum-2 downto 0);
 signal     sew: STD_LOGIC_VECTOR (lgSEW_MAX-1 downto 0);
-signal     vl: STD_LOGIC_VECTOR(XLEN-1 downto 0); 
+signal     vl: STD_LOGIC_VECTOR(XLEN-1 downto 0);
+signal     vstart: STD_LOGIC_VECTOR(XLEN-1 downto 0); 
 
 begin
     UUT: Bank GENERIC MAP(VLMAX, RegNum, SEW_MAX, lgSEW_MAX, XLEN, VLEN)
-    PORT MAP(clk, newInst, out1, out2, RegSel1, RegSel2, WriteEn, WriteData, WriteDest, sew, vl);
+    PORT MAP(clk, newInst, out1, out2, RegSel1, RegSel2, WriteEn, WriteData, WriteDest, sew, vl, vstart);
     
     clk_proc: process begin
         clk<='1';
@@ -94,13 +96,13 @@ begin
     end process;
     
     process begin
-        newInst<='0'; sew <= "01000"; vl <= x"00000004"; WriteEn<='1'; WriteData<= x"00000004"; WriteDest<="00000"; RegSel1<="00000"; RegSel2<="00001";
+        newInst<='0'; sew <= "01000"; vl <= x"00000004"; vstart <= x"00000000"; WriteEn<='1'; WriteData<= x"00000004"; WriteDest<="0000"; RegSel1<="0000"; RegSel2<="0001";
         wait for 10ns; newInst<='1'; wait for 5ns; newInst<= '0'; wait for 5ns;
         WriteData<= x"00000005";  wait for 10ns;
         WriteData<= x"00000006"; wait for 10ns;
         WriteData<= x"FFFFFFF7";  wait for 30ns;
         --WriteData<= x"00000008"; RegSelA<="00000";  wait for 20ns; 
-        newInst<= '1'; WriteData<= x"00000008"; wait for 5ns; newInst<= '0'; wait for 5ns; 
+        newInst<= '1'; WriteData<= x"00000008"; vstart <= x"00000001"; wait for 5ns; newInst<= '0'; wait for 5ns; 
         WriteData<= x"00000009";  wait for 10ns;
         WriteData<= x"0000000A"; wait for 10ns;
         WriteData<= x"0000000B";  wait for 10ns;

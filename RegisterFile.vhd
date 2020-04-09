@@ -59,7 +59,8 @@ entity RegisterFile is
            WriteData2 : in STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
            WriteDest2 : in STD_LOGIC_VECTOR (RegNum-1 downto 0);
            sew: in STD_LOGIC_VECTOR (lgSEW_MAX-1 downto 0);
-           vl: in STD_LOGIC_VECTOR(XLEN-1 downto 0));
+           vl: in STD_LOGIC_VECTOR(XLEN-1 downto 0);
+           vstart: in STD_LOGIC_VECTOR(XLEN-1 downto 0));
 end RegisterFile;
 
 architecture Behavioral of RegisterFile is
@@ -85,7 +86,8 @@ architecture Behavioral of RegisterFile is
            WriteData : in STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
            WriteDest : in STD_LOGIC_VECTOR (RegNum-2 downto 0);
            sew: in STD_LOGIC_VECTOR (lgSEW_MAX-1 downto 0);
-           vl: in STD_LOGIC_VECTOR(XLEN-1 downto 0) 
+           vl: in STD_LOGIC_VECTOR(XLEN-1 downto 0);
+           vstart: in STD_LOGIC_VECTOR(XLEN-1 downto 0)
            );
 end component;
     
@@ -172,8 +174,8 @@ begin
     end process;
     
     BankA: Bank GENERIC MAP(VLMAX, RegNum, SEW_MAX, lgSEW_MAX, XLEN, VLEN)
-    PORT MAP(clk, newInst, out1, out2, RegSelA1, RegSelA2, WriteEn1, WriteData1, WriteDestA, sew, vl);
+    PORT MAP(clk, newInst, out1, out2, RegSelA1, RegSelA2, WriteEn1, WriteData1, WriteDestA, sew, vl, vstart);
     
     BankB: Bank GENERIC MAP(VLMAX, RegNum, SEW_MAX, lgSEW_MAX, XLEN, VLEN)
-    PORT MAP(clk, newInst, out3, out4, RegSelB1, RegSelB2, WriteEn2, WriteData2, WriteDestB, sew, vl);
+    PORT MAP(clk, newInst, out3, out4, RegSelB1, RegSelB2, WriteEn2, WriteData2, WriteDestB, sew, vl, vstart);
 end Behavioral;

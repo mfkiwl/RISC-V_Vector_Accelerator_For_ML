@@ -80,14 +80,14 @@ begin
 --            --else --stall
 --            end if;
             RegSelA1 <= RegSel1(RegNum-2 downto 0);
-            RegSelA2 <= RegSel1(RegNum-2 downto 0);
+            --RegSelA2 <= RegSel1(RegNum-2 downto 0);
         else --Bank B
 --            if ( RegSelFlag(RSB1) = '0' ) then RegSelB1 <= RegSel1(RegNum-2 downto 0); RegSelFlag(RSB1):='1'; 
 --            elsif( ( RegSelFlag(RSB2) = '0' ) ) then RegSelB2 <= RegSel1(RegNum-2 downto 0); RegSelFlag(RSB2):='1';
 --            --else --stall
 --            end if;
             RegSelB1 <= RegSel1(RegNum-2 downto 0);
-            RegSelB2 <= RegSel1(RegNum-2 downto 0);
+            --RegSelB2 <= RegSel1(RegNum-2 downto 0);
         end if;
         
         if( RegSel2(RegNum-1) = '1') then
@@ -95,14 +95,14 @@ begin
 --            elsif( ( RegSelFlag(RSA2) = '0' ) ) then RegSelA2 <= RegSel2(RegNum-2 downto 0); RegSelFlag(RSA2):='1';
 --            --else --stall
 --            end if; 
-            RegSelA1 <= RegSel2(RegNum-2 downto 0);
+            --RegSelA1 <= RegSel2(RegNum-2 downto 0);
             RegSelA2 <= RegSel2(RegNum-2 downto 0);
         else --Bank B
 --            if ( RegSelFlag(RSB1) = '0' ) then RegSelB1 <= RegSel2(RegNum-2 downto 0); RegSelFlag(RSB1):='1'; 
 --            elsif( ( RegSelFlag(RSB2) = '0' ) ) then RegSelB2 <= RegSel2(RegNum-2 downto 0); RegSelFlag(RSB2):='1';
 --            --else --stall
 --            end if;
-            RegSelB1 <= RegSel2(RegNum-2 downto 0);
+            --RegSelB1 <= RegSel2(RegNum-2 downto 0);
             RegSelB2 <= RegSel2(RegNum-2 downto 0);
         end if;
         
@@ -112,14 +112,14 @@ begin
 --            --else --stall
 --            end if; 
             RegSelA1 <= RegSel3(RegNum-2 downto 0);
-            RegSelA2 <= RegSel3(RegNum-2 downto 0);
+            --RegSelA2 <= RegSel3(RegNum-2 downto 0);
         else --Bank B
 --            if ( RegSelFlag(RSB1) = '0' ) then RegSelB1 <= RegSel3(RegNum-2 downto 0); RegSelFlag(RSB1):='1'; 
 --            elsif( ( RegSelFlag(RSB2) = '0' ) ) then RegSelB2 <= RegSel3(RegNum-2 downto 0); RegSelFlag(RSB2):='1';
 --            --else --stall
 --            end if;
             RegSelB1 <= RegSel3(RegNum-2 downto 0);
-            RegSelB2 <= RegSel3(RegNum-2 downto 0);
+            --RegSelB2 <= RegSel3(RegNum-2 downto 0);
         end if;
         
         if( RegSel4(RegNum-1) = '1') then
@@ -127,14 +127,14 @@ begin
 --            elsif( ( RegSelFlag(RSA2) = '0' ) ) then RegSelA2 <= RegSel4(RegNum-2 downto 0); RegSelFlag(RSA2):='1';
 --            --else --stall
 --            end if; 
-            RegSelA1 <= RegSel4(RegNum-2 downto 0);
+            --RegSelA1 <= RegSel4(RegNum-2 downto 0);
             RegSelA2 <= RegSel4(RegNum-2 downto 0);
         else --Bank B
 --            if ( RegSelFlag(RSB1) = '0' ) then RegSelB1 <= RegSel4(RegNum-2 downto 0); RegSelFlag(RSB1):='1'; 
 --            elsif( ( RegSelFlag(RSB2) = '0' ) ) then RegSelB2 <= RegSel4(RegNum-2 downto 0); RegSelFlag(RSB2):='1';
 --            --else --stall
 --            end if;
-            RegSelB1 <= RegSel4(RegNum-2 downto 0);
+            --RegSelB1 <= RegSel4(RegNum-2 downto 0);
             RegSelB2 <= RegSel4(RegNum-2 downto 0);
         end if;
         
@@ -159,7 +159,7 @@ begin
 --            if(WriteDestFlag(WDB)='0') then WriteDestB<= WriteDest2(RegNum-2 downto 0); WriteDestFlag(WDB):='1';
 --            --else -- stall
 --            end if;
-            WriteDestA<= WriteDest1(RegNum-2 downto 0);
+            WriteDestB<= WriteDest2(RegNum-2 downto 0);
         end if;
     end process;
     

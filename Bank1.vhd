@@ -72,7 +72,7 @@ begin
     sew_int<= to_integer(unsigned(sew)); --convert sew to integer for reading
     vl_int<= to_integer(unsigned(vl)); --convert vl to integer
     
-    process(clk) is
+    process(clk, newInst, RegSel1, RegSel2, WriteDest, WriteData, WriteEn) is
         variable read_counter: integer range 0 to (VLEN-1); -- first bit to read from
         variable write_counter: integer range 0 to (VLEN-1); -- first bit to write to
         variable elements_read: integer range 0 to (VLMAX-1); -- # of elements read so far

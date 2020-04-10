@@ -1,37 +1,6 @@
-----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
--- 
--- Create Date: 02/10/2020 10:48:19 AM
--- Design Name: 
--- Module Name: Control_Unit - Behavioral
--- Project Name: 
--- Target Devices: 
--- Tool Versions: 
--- Description: 
--- 
--- Dependencies: 
--- 
--- Revision:
--- Revision 0.01 - File Created
--- Additional Comments:
--- 
-----------------------------------------------------------------------------------
-
-
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
-
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
-
--- Uncomment the following library declaration if instantiating
--- any Xilinx leaf cells in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
-
 
 --The Control Unit decides the control signals based on the opcode
 entity Control_Unit is
@@ -109,7 +78,7 @@ entity Control_Unit is
 end Control_Unit;
 
 
-architecture Behavioral of Control_Unit is
+architecture CU_arch of Control_Unit is
 
 function minimum(X: in std_logic_vector ;Y: in std_logic_vector) return std_logic_vector is
 begin
@@ -266,4 +235,4 @@ begin
         end if;
     end process;
 
-end Behavioral;
+end CU_arch;

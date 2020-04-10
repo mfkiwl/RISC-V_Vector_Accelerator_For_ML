@@ -1,11 +1,11 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
---The decoder divides the incoming vector instructions into the respective fields (based on RISC-V vector spec)
+--The decoder divides the incoming vector instructions into the respective fields
 
 entity Decoder is
     Port ( d_vect_inst : in STD_LOGIC_VECTOR (31 downto 0);
-           -- Instruction Fields: (for ALU and memory)
+           -- Instruction Fields:
            d_funct6 : out STD_LOGIC_VECTOR (5 downto 0);
            d_bit31: out STD_LOGIC; -- used for vsetvl,vsetvli instructions
            d_nf : out STD_LOGIC_VECTOR (2 downto 0);
@@ -19,7 +19,7 @@ entity Decoder is
 end Decoder;
 
 
-architecture Behavioral of Decoder is 
+architecture Decoder_arch of Decoder is 
     begin
         d_funct6<=d_vect_inst(31 downto 26);
         d_bit31<=d_vect_inst(31);
@@ -32,4 +32,4 @@ architecture Behavioral of Decoder is
         d_vd_vs3<=d_vect_inst(11 downto 7);
         d_opcode<=d_vect_inst(6 downto 0);
 
-end Behavioral;
+end Decoder_arch;

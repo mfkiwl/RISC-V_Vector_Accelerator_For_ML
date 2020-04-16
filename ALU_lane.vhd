@@ -6,13 +6,10 @@ entity ALU_lane is
     generic (
            SEW_MAX: integer:=32 --max element width
            );
-    Port (  clk : in STD_LOGIC;
-            reset: in STD_LOGIC;
-            operand1: in STD_LOGIC_VECTOR(SEW_MAX-1 downto 0);
+    Port (  operand1: in STD_LOGIC_VECTOR(SEW_MAX-1 downto 0);
             operand2: in STD_LOGIC_VECTOR(SEW_MAX-1 downto 0);
             funct6: in STD_LOGIC_VECTOR (5 downto 0); --to know which operation
-            result: out STD_LOGIC_VECTOR(SEW_MAX-1 downto 0);
-            busy: out STD_LOGIC      
+            result: out STD_LOGIC_VECTOR(SEW_MAX-1 downto 0) 
             );
 end ALU_lane;
 

@@ -65,7 +65,34 @@ begin
                 result <= unsigned_maximum(operand1, operand2);
             when "000111" => --vmin (maximum signed)
                 result <= signed_maximum(operand1, operand2);
-            when others => result<= (others=>'0');
+            when "001001" => --vand
+                result <= (operand1 and operand2);
+            when "001010" => --vor
+                result <= (operand1 or operand2); 
+            when "001011" => --vxor
+                result <= (operand1 xor operand2);
+            --when "010111" => --vmerge/vmv
+                --result <= ;
+            when "011000" => --vmseq (set mask register element if equal)
+                result <= (operand1 and operand2);
+            when "011001" => --vmsne (set mask register element if not equal)
+                result <= (operand1 and (not operand2));
+            when "011010" => --vmsltu (set mask register element if operand1 < operand2 unsigned)
+            when "011011" => --vmsltu (set mask register element if operand1 < operand2 signed)
+            when "011100" => --vmsleu (set mask register element if operand1 <= operand2 unsigned)
+            when "011101" => --vmsleu (set mask register element if operand1 <= operand2 signed)
+            when "011110" => --vmsgtu (set mask register element if operand1 > operand2 unsigned)
+            when "011111" => --vmsgt (set mask register element if operand1 > operand2 signed)
+            when "100000" => --vdivu (division unsigned)
+                result<= std_logic_vector(unsigned(operand1)/unsigned(operand2));
+            when "100001" => --vdivu (division signed)
+                result<= std_logic_vector(signed(operand1)/signed(operand2));
+            when "100010" => --vremu (remainder unsigned)
+                result<= std_logic_vector(unsigned(operand1) rem unsigned(operand2));
+            when "100011" => --vrem (remainder signed)
+                result<= std_logic_vector(signed(operand1) rem signed(operand2));
+            
+            when others => result<= (others=>'0'); 
         end case; 
         
     end process;

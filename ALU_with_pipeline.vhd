@@ -1,6 +1,6 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-
+use IEEE.NUMERIC_STD.ALL;
 entity ALU_with_pipeline is
     generic(
            VLMAX: integer :=32; -- Max Vector Length (max number of elements) 
@@ -98,8 +98,12 @@ begin
             s_op2_src_2<=(others=>'0');
             s_funct6_1<= (others=>'0');
             s_funct6_2<= (others=>'0');
-            s_result_1<= (others=>'0');
-            s_result_2<= (others=>'0');
+            result_1<= (others=>'0');
+            result_2<= (others=>'0');
+            s_WriteEn_i_1<='0';
+            s_WriteEn_i_2<='0';
+            WriteEn_o_1<='0';
+            WriteEn_o_2<='0';
         elsif(rising_edge(clk) and busy= '0' ) then 
             s_Xdata_1<=  Xdata_1;
             s_Xdata_2<=  Xdata_2;
@@ -113,8 +117,13 @@ begin
             s_op2_src_2<=op2_src_2;
             s_funct6_1<= funct6_1;
             s_funct6_2<= funct6_2;
+            s_WriteEn_i_1<=WriteEn_i_1;
+            s_WriteEn_i_2<=WriteEn_i_2;
+            --pipeline reg after ALU
             result_1<= s_result_1;
             result_2<= s_result_2;
+            WriteEn_o_1<=s_WriteEn_i_1;
+            WriteEn_o_2<=s_WriteEn_i_2;
         end if;          
     end process;
     
@@ -122,15 +131,15 @@ begin
                   port map(s_Vdata1_1, s_operand2_1, s_Vdata1_2, s_operand2_2,s_funct6_1, s_funct6_2, s_result_1, s_result_2);
     
     with s_op2_src_1 select s_operand2_1 <=
-	Vdata2_1      when "00",
-	Xdata_1       when "01", --need to check XLEN (use resize)
-	Idata_1       when "10", --need to sign-extend
-	(others=>'0') when "11";
+	Vdata2_1                                             when "00",
+	std_logic_vector(resize(signed(Xdata_1),SEW_MAX))    when "01", --need to sign-extend because XLEN not necessarily = SEW
+	std_logic_vector(resize(signed(Idata_1),SEW_MAX))    when "10", --need to sign-extend because imm is 5 bits
+	(others=>'0')                                        when others;
 	
 	with s_op2_src_2 select s_operand2_2 <=
-	Vdata2_2      when "00",
-	Xdata_2       when "01", --need to check XLEN
-	Idata_2       when "10", --need to sign-extend
-	(others=>'0') when "11";
+	Vdata2_2                                             when "00",
+	std_logic_vector(resize(signed(Xdata_2),SEW_MAX))    when "01", --need to sign-extend because XLEN not necessarily = SEW
+	std_logic_vector(resize(signed(Idata_2),SEW_MAX))    when "10", --need to sign-extend because imm is 5 bits
+	(others=>'0')                                        when others;
     
 end Behavioral;

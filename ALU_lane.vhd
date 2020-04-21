@@ -51,6 +51,7 @@ end unsigned_maximum;
 
 begin
     process(funct6, funct3, operand1, operand2)
+    variable tmp:std_logic_vector(2*SEW_MAX-1 downto 0);
     begin
         if(funct3 = "000" or funct3 = "011" or funct3="100") then
             case funct6 is
@@ -87,11 +88,11 @@ begin
                 when "011110" => --vmsgtu (set mask register element if operand1 > operand2 unsigned)
                 when "011111" => --vmsgt (set mask register element if operand1 > operand2 signed)
                 when "100101" => --vsll (shift left logical)
-					result<= shift_left(unsigned(operand1), unsigned(operand2(lgSEW_MAX-1 downto 0)) );
+					result<= std_logic_vector(shift_left(unsigned(operand1), to_integer(unsigned(operand2(lgSEW_MAX-1 downto 0))) ));
 				when "101000" => --vsrl (shift right logical (zero-extension) ) 
-					result<= shift_right(unsigned(operand1), unsigned(operand2(lgSEW_MAX-1 downto 0)) );
+					result<= std_logic_vector(shift_right(unsigned(operand1),to_integer( unsigned(operand2(lgSEW_MAX-1 downto 0))) ));
 				when "101001" => --vsra (shift right arithmetic (sign-extension) )
-					result<= shift_right(signed(operand1), unsigned(operand2(lgSEW_MAX-1 downto 0)) );
+					result<= std_logic_vector(shift_right(signed(operand1),to_integer( unsigned(operand2(lgSEW_MAX-1 downto 0)) )));
                 when others => result<= (others=>'0'); 
             end case;
         elsif(funct3 = "010" or funct3 = "110") then
@@ -105,13 +106,17 @@ begin
                 when "100011" => --vrem (remainder signed)
                     result<= std_logic_vector(signed(operand1) rem signed(operand2));
                 when "100100" => --vmulhu (multiplication unsigned, returning high bits of product)
-                	
+                	tmp:= std_logic_vector(unsigned(operand1)*unsigned(operand2));
+                	result<=tmp(2*SEW_MAX-1 downto SEW_MAX);
                 when "100101" => --vmul (multiplication signed, returning low bits of product)
-	
-				when "100110" => --vmulhsu: Signed(vs2)-Unsigned multiply, returning high bits of product
-	
-				when "100111" => --vmulh: Signed multiply, returning low bits of product
-
+                	tmp:= std_logic_vector(signed(operand1)*signed(operand2));
+                	result<=tmp(SEW_MAX-1 downto 0);	
+--				when "100110" => --vmulhsu: Signed(vs2)-Unsigned multiply, returning high bits of product
+--                	tmp:= std_logic_vector(unsigned(operand1)*unsigned(operand2));
+--                	result<=tmp(2*SEW_MAX-1 downto SEW_MAX);	
+				when "100111" => --vmulh: Signed multiply, returning high bits of product
+                	tmp:= std_logic_vector(signed(operand1)*signed(operand2));
+                	result<=tmp(2*SEW_MAX-1 downto SEW_MAX);
                 when others => result<= (others=>'0'); 
             end case;
         end if;

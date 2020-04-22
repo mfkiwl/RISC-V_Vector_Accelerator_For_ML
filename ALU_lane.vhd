@@ -7,7 +7,8 @@ entity ALU_lane is
            	SEW_MAX: integer:=32; --max element width
 			lgSEW_MAX: integer:=5
            );
-    Port (  operand1: in STD_LOGIC_VECTOR(SEW_MAX-1 downto 0);
+    Port (  
+            operand1: in STD_LOGIC_VECTOR(SEW_MAX-1 downto 0);
             operand2: in STD_LOGIC_VECTOR(SEW_MAX-1 downto 0);
             funct6: in STD_LOGIC_VECTOR (5 downto 0); --to know which operation
             funct3: in STD_LOGIC_VECTOR (2 downto 0); 
@@ -78,15 +79,53 @@ begin
                 --when "010111" => --vmerge/vmv
                     --result <= ;
                 when "011000" => --vmseq (set mask register element if equal)
-                    result <= (operand1 and operand2);
+                    if (operand1 = operand2) then
+                        result(SEW_MAX-1 downto 1)<= (others=>'0'); result(0)<= '1';
+                    else
+                        result<= (others=>'0');
+                    end if;
                 when "011001" => --vmsne (set mask register element if not equal)
-                    result <= (operand1 and (not operand2));
+                    if (operand1 /= operand2) then
+                        result(SEW_MAX-1 downto 1)<= (others=>'0'); result(0)<= '1';
+                    else
+                        result<= (others=>'0');
+                    end if;
                 when "011010" => --vmsltu (set mask register element if operand1 < operand2 unsigned)
+                    if (unsigned(operand1) < unsigned(operand2) ) then
+                        result(SEW_MAX-1 downto 1)<= (others=>'0'); result(0)<= '1';
+                    else
+                        result<= (others=>'0');
+                    end if;
                 when "011011" => --vmsltu (set mask register element if operand1 < operand2 signed)
+                    if (signed(operand1) < signed(operand2)) then
+                        result(SEW_MAX-1 downto 1)<= (others=>'0'); result(0)<= '1';
+                    else
+                        result<= (others=>'0');
+                    end if;
                 when "011100" => --vmsleu (set mask register element if operand1 <= operand2 unsigned)
+                    if (unsigned(operand1) <= unsigned(operand2)) then
+                        result(SEW_MAX-1 downto 1)<= (others=>'0'); result(0)<= '1';
+                    else
+                        result<= (others=>'0');
+                    end if;
                 when "011101" => --vmsleu (set mask register element if operand1 <= operand2 signed)
+                    if (signed(operand1) <= signed(operand2)) then
+                        result(SEW_MAX-1 downto 1)<= (others=>'0'); result(0)<= '1';
+                    else
+                        result<= (others=>'0');
+                    end if;
                 when "011110" => --vmsgtu (set mask register element if operand1 > operand2 unsigned)
+                    if (unsigned(operand1) > unsigned(operand2)) then
+                        result(SEW_MAX-1 downto 1)<= (others=>'0'); result(0)<= '1';
+                    else
+                        result<= (others=>'0');
+                    end if;
                 when "011111" => --vmsgt (set mask register element if operand1 > operand2 signed)
+                    if (signed(operand1) > signed(operand2)) then
+                        result(SEW_MAX-1 downto 1)<= (others=>'0'); result(0)<= '1';
+                    else
+                        result<= (others=>'0');
+                    end if;
                 when "100101" => --vsll (shift left logical)
 					result<= std_logic_vector(shift_left(unsigned(operand1), to_integer(unsigned(operand2(lgSEW_MAX-1 downto 0))) ));
 				when "101000" => --vsrl (shift right logical (zero-extension) ) 

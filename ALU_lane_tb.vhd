@@ -28,11 +28,12 @@ constant lgSEW_MAX: integer:=5;
 signal operand1: STD_LOGIC_VECTOR(SEW_MAX-1 downto 0);
 signal operand2: STD_LOGIC_VECTOR(SEW_MAX-1 downto 0);
 signal funct6: STD_LOGIC_VECTOR (5 downto 0); --to know which operation
-signal result: STD_LOGIC_VECTOR(SEW_MAX-1 downto 0);
 signal funct3:STD_LOGIC_VECTOR(2 downto 0);
+signal result: STD_LOGIC_VECTOR(SEW_MAX-1 downto 0);
+
 begin
     UUT: ALU_lane generic map(SEW_MAX,lgSEW_MAX)
-    port map(operand1, operand2, funct6,funct3, result);
+    port map(operand1, operand2, funct6, funct3, result);
     
 --    clk_proc: process begin
 --        clk<='1';
@@ -50,6 +51,10 @@ begin
         funct6<= "000101"; operand1<=x"FFFFFFFE"; operand2<= x"FFFFFFFD"; wait for 10ns; --signed min
         funct6<= "000110"; operand1<=x"00000005"; operand2<= x"00000008"; wait for 10ns; --unsigned max
         funct6<= "000111"; operand1<=x"FFFFFFFE"; operand2<= x"FFFFFFFD"; wait for 10ns; --signed max
+        funct6<= "001001"; operand1<=x"000000AF"; operand2<= x"00000084"; wait for 10ns; --and
+        
+        funct6<= "011000"; operand1<=x"000000AF"; operand2<= x"000000AF"; wait for 10ns; --seq
+         
         funct6<= "100101"; operand1<=x"00000002"; operand2<= x"00000001"; wait for 10ns; --sll        
         funct6<= "101000"; operand1<=x"FFFFFFFE"; operand2<= x"00000004"; wait for 10ns; --srl          
         funct6<= "101001"; operand1<=x"FFFFFFFE"; operand2<= x"00000004"; wait for 10ns; --sra  

@@ -18,6 +18,7 @@ entity RegisterFile is
            out2 : out STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
            out3 : out STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
            out4 : out STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
+           mask_bit: out STD_LOGIC;
            RegSel1 : in STD_LOGIC_VECTOR (RegNum-1 downto 0);
            RegSel2 : in STD_LOGIC_VECTOR (RegNum-1 downto 0);
            RegSel3 : in STD_LOGIC_VECTOR (RegNum-1 downto 0);
@@ -35,7 +36,7 @@ end RegisterFile;
 
 architecture RegFile_arch of RegisterFile is
     
-    component Bank is
+    component Bank1 is
     generic (
            -- Max Vector Length
            VLMAX: integer :=32;
@@ -50,6 +51,7 @@ architecture RegFile_arch of RegisterFile is
            newInst: in STD_LOGIC;
            out1 : out STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
            out2 : out STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
+           mask_bit: out STD_LOGIC;
            RegSel1 : in STD_LOGIC_VECTOR (RegNum-2 downto 0);
            RegSel2 : in STD_LOGIC_VECTOR (RegNum-2 downto 0);
            WriteEn : in STD_LOGIC;
@@ -60,7 +62,34 @@ architecture RegFile_arch of RegisterFile is
            vstart: in STD_LOGIC_VECTOR(XLEN-1 downto 0)
            );
 end component;
+
+component Bank2 is
+
+    generic (
+           -- Max Vector Length (max number of elements) 
+           VLMAX: integer :=32;
+           -- log(Number of Vector Registers)
+           RegNum: integer:= 5; 
+           SEW_MAX: integer:=32;
+           lgSEW_MAX: integer:=5;
+           XLEN:integer:=32; --Register width
+           VLEN:integer:=32 --number of bits in register
     
+             );
+    Port ( clk : in STD_LOGIC;
+           newInst: in STD_LOGIC;
+           out1 : out STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
+           out2 : out STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
+           RegSel1 : in STD_LOGIC_VECTOR (RegNum-2 downto 0);
+           RegSel2 : in STD_LOGIC_VECTOR (RegNum-2 downto 0);
+           WriteEn : in STD_LOGIC;
+           WriteData : in STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
+           WriteDest : in STD_LOGIC_VECTOR (RegNum-2 downto 0);
+           sew: in STD_LOGIC_VECTOR (lgSEW_MAX-1 downto 0);
+           vl: in STD_LOGIC_VECTOR(XLEN-1 downto 0);
+           vstart: in STD_LOGIC_VECTOR(XLEN-1 downto 0)
+           );
+end component;   
     --Bank A used for registers 16 to 31 and Bank B used for registers 0 to 15
     signal RegSelA1, RegSelA2, RegSelB1, RegSelB2, WriteDestA, WriteDestB: STD_LOGIC_VECTOR (RegNum-2 downto 0);
     --constant RSA1: integer := 3; constant RSA2: integer := 2;
@@ -163,9 +192,9 @@ begin
         end if;
     end process;
     
-    BankA: Bank GENERIC MAP(VLMAX, RegNum, SEW_MAX, lgSEW_MAX, XLEN, VLEN)
+    BankA: Bank2 GENERIC MAP(VLMAX, RegNum, SEW_MAX, lgSEW_MAX, XLEN, VLEN)
     PORT MAP(clk, newInst, out1, out2, RegSelA1, RegSelA2, WriteEn1, WriteData1, WriteDestA, sew, vl, vstart);
     
-    BankB: Bank GENERIC MAP(VLMAX, RegNum, SEW_MAX, lgSEW_MAX, XLEN, VLEN)
-    PORT MAP(clk, newInst, out3, out4, RegSelB1, RegSelB2, WriteEn2, WriteData2, WriteDestB, sew, vl, vstart);
+    BankB: Bank1 GENERIC MAP(VLMAX, RegNum, SEW_MAX, lgSEW_MAX, XLEN, VLEN)
+    PORT MAP(clk, newInst, out3, out4,mask_bit, RegSelB1, RegSelB2, WriteEn2, WriteData2, WriteDestB, sew, vl, vstart);
 end RegFile_arch;

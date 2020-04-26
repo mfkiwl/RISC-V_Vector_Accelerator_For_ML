@@ -17,6 +17,7 @@ component ALU_with_pipeline is
     Port (  clk: in STD_LOGIC; 
             rst: in STD_LOGIC;
             busy: in STD_LOGIC;
+            mask_in: in STD_LOGIC;
             Xdata_1: in STD_LOGIC_VECTOR(XLEN-1 downto 0); --data from scalar register for Lane 1
             Xdata_2: in STD_LOGIC_VECTOR(XLEN-1 downto 0); --data from scalar register for Lane 2
             Vdata1_1: in STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --data coming from vector register to Lane 1
@@ -33,6 +34,8 @@ component ALU_with_pipeline is
             op2_src_2: in STD_LOGIC_VECTOR(1 downto 0); -- selects between scalar/vector reg or immediate from operand 2 for Lane 2
             funct6_1: in STD_LOGIC_VECTOR(5 downto 0); --to know which operation
             funct6_2: in STD_LOGIC_VECTOR(5 downto 0); --to know which operation
+            funct3_1: in STD_LOGIC_VECTOR(2 downto 0); --to know which operation
+            funct3_2: in STD_LOGIC_VECTOR(2 downto 0); --to know which operation
             WriteEn_i_1: in STD_LOGIC; --WriteEn for Lane 1 from controller
             WriteEn_i_2: in STD_LOGIC; --WriteEn for Lane 2 from controller
             WriteEn_o_1: out STD_LOGIC; --WriteEn for Lane 1 out to Register File
@@ -63,18 +66,20 @@ signal      op2_src_1: STD_LOGIC_VECTOR(1 downto 0); -- selects between scalar/v
 signal      op2_src_2: STD_LOGIC_VECTOR(1 downto 0); -- selects between scalar/vector reg or immediate from operand 2 for Lane 2
 signal      funct6_1: STD_LOGIC_VECTOR(5 downto 0); --to know which operation
 signal      funct6_2: STD_LOGIC_VECTOR(5 downto 0); --to know which operation
+signal      funct3_1: STD_LOGIC_VECTOR(2 downto 0); --to know which operation
+signal      funct3_2: STD_LOGIC_VECTOR(2 downto 0); --to know which operation
 signal      WriteEn_i_1: STD_LOGIC; --WriteEn for Lane 1 from controller
 signal      WriteEn_i_2: STD_LOGIC; --WriteEn for Lane 2 from controller
 signal      WriteEn_o_1: STD_LOGIC; --WriteEn for Lane 1 out to Register File
 signal      WriteEn_o_2: STD_LOGIC; --WriteEn for Lane 2 out to Register File
 signal      result_1: STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --result from Lane 1
 signal      result_2: STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --result from Lane 2
-
+signal      mask_in: STD_LOGIC;
 begin
     DUT: ALU_with_pipeline generic map(VLMAX, SEW_MAX, lgSEW_MAX, XLEN, VLEN)
-                           port map(clk,rst,busy,
+                           port map(clk,rst,busy,mask_in,
                                     Xdata_1,Xdata_2,Vdata1_1,Vdata2_1,Vdata1_2,Vdata2_2,Idata_1,Idata_2,
-                                    op2_src_1,op2_src_2,funct6_1,funct6_2,WriteEn_i_1,WriteEn_i_2,WriteEn_o_1,WriteEn_o_2,result_1, result_2);
+                                    op2_src_1,op2_src_2,funct6_1,funct6_2,funct3_1,funct3_2,WriteEn_i_1,WriteEn_i_2,WriteEn_o_1,WriteEn_o_2,result_1, result_2);
                                     
     clk_proc: process begin
         clk<='0';
@@ -84,10 +89,10 @@ begin
     end process;
     
     process begin
-        rst<='1'; wait for 10ns; rst<= '0'; busy<='0'; Xdata_1<= x"00000006"; Xdata_2<= x"00000003"; Vdata1_1<= x"FFFFFFF5"; Vdata2_1<= x"FFFFFFF5"; Vdata1_2<= x"FFFFFFF3"; Vdata2_2<= x"FFFFFFF2";
+        rst<='1'; wait for 10ns; rst<= '0'; busy<='0';funct3_1<="000";funct3_2<="000"; Xdata_1<= x"00000006"; Xdata_2<= x"00000003"; Vdata1_1<= x"FFFFFFF5"; Vdata2_1<= x"FFFFFFF5"; Vdata1_2<= x"FFFFFFF3"; Vdata2_2<= x"FFFFFFF2";
         Idata_1<= "00011"; Idata_2<= "00111"; op2_src_1<= "00"; op2_src_2<= "00"; funct6_1<="000000"; funct6_2<="000000";  WriteEn_i_1<= '1'; WriteEn_i_2<= '1'; wait for 8ns;
-        Vdata1_1<= x"00000003";  Vdata1_2<= x"00000008"; op2_src_1<= "01"; op2_src_2<= "10";
-        
+        Vdata1_1<= x"00000003";  Vdata1_2<= x"00000008"; op2_src_1<= "01"; op2_src_2<= "10"; wait for 8 ns;
+        Vdata1_1<= x"00000006";  Vdata1_2<= x"00000007"; op2_src_1<= "00"; op2_src_2<= "00";Vdata1_2<= x"FFFFFFF4"; Vdata2_2<= x"FFFFFFF3";funct6_1<="010111";funct6_2<="010111";mask_in<='1';wait for 8ns;
         wait; 
     end process;
 

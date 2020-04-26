@@ -33,6 +33,7 @@ component RegisterFile is
            out2 : out STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
            out3 : out STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
            out4 : out STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
+           mask_bit: out STD_LOGIC;
            RegSel1 : in STD_LOGIC_VECTOR (RegNum-1 downto 0);
            RegSel2 : in STD_LOGIC_VECTOR (RegNum-1 downto 0);
            RegSel3 : in STD_LOGIC_VECTOR (RegNum-1 downto 0);
@@ -67,11 +68,12 @@ signal     WriteDest2 : STD_LOGIC_VECTOR (RegNum-1 downto 0);
 signal     sew: STD_LOGIC_VECTOR (lgSEW_MAX-1 downto 0);
 signal     vl: STD_LOGIC_VECTOR(XLEN-1 downto 0);
 signal     vstart: STD_LOGIC_VECTOR(XLEN-1 downto 0);
+signal     mask_bit: STD_LOGIC;
 
 begin
 
     UUT: RegisterFile GENERIC MAP(VLMAX,RegNum,SEW_MAX,lgSEW_MAX,XLEN,VLEN)
-    PORT MAP(clk,newInst,out1,out2,out3,out4,RegSel1,RegSel2,RegSel3,RegSel4,WriteEn1,WriteEn2,WriteData1,WriteDest1,WriteData2,WriteDest2,sew,vl,vstart);
+    PORT MAP(clk,newInst,out1,out2,out3,out4,mask_bit,RegSel1,RegSel2,RegSel3,RegSel4,WriteEn1,WriteEn2,WriteData1,WriteDest1,WriteData2,WriteDest2,sew,vl,vstart);
 
     clk_proc: process begin
         clk<='1';

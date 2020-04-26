@@ -1,7 +1,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use ieee.numeric_std.all;
-entity Bank1 is
+entity Bank2 is
 
     generic (
            -- Max Vector Length (max number of elements) 
@@ -18,7 +18,6 @@ entity Bank1 is
            newInst: in STD_LOGIC;
            out1 : out STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
            out2 : out STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
-           mask_bit: out STD_LOGIC;
            RegSel1 : in STD_LOGIC_VECTOR (RegNum-2 downto 0);
            RegSel2 : in STD_LOGIC_VECTOR (RegNum-2 downto 0);
            WriteEn : in STD_LOGIC;
@@ -28,9 +27,9 @@ entity Bank1 is
            vl: in STD_LOGIC_VECTOR(XLEN-1 downto 0);
            vstart: in STD_LOGIC_VECTOR(XLEN-1 downto 0)
            );
-end Bank1;
+end Bank2;
 
-architecture Bank1_arch of Bank1 is
+architecture Bank2_arch of Bank2 is
     type registerFile is array(0 to (2**(RegNum-1)-1)) of std_logic_vector(VLEN-1 downto 0);   
     signal registers : registerFile;
 
@@ -58,7 +57,6 @@ begin
             end if;
         elsif falling_edge(clk) then
             if(elements_read < vl_int) then
-                mask_bit<=registers(0)(read_counter);
                 out1<= std_logic_vector(resize( signed((registers(to_integer(unsigned(RegSel1))) ((read_counter+sew_int-1) downto read_counter)) ), out1'length));
                 out2<= std_logic_vector(resize( signed((registers(to_integer(unsigned(RegSel2))) ((read_counter+sew_int-1) downto read_counter)) ), out2'length));
                 read_counter:= read_counter+sew_int;
@@ -66,4 +64,4 @@ begin
             end if;
         end if;
     end process;
-end Bank1_arh;
+end Bank2_arch;

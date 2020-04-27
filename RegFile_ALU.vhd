@@ -138,7 +138,7 @@ begin
 
 
 RF: RegisterFile GENERIC MAP(VLMAX,RegNum,SEW_MAX,lgSEW_MAX,XLEN,VLEN)
-    PORT MAP(clk,newInst,op1_1,op2_1,op1_2,op2_2,s_mask_bit,RegSel1,RegSel2,RegSel3,RegSel4,s_WriteEn_1,s_WriteEn_2,s_result_1,WriteDest1,s_result_2,WriteDest2,sew,vl,vstart);
+    PORT MAP(clk,newInst,s_op1_1,s_op2_1,s_op1_2,s_op2_2,s_mask_bit,RegSel1,RegSel2,RegSel3,RegSel4,s_WriteEn_1,s_WriteEn_2,s_result_1,WriteDest1,s_result_2,WriteDest2,sew,vl,vstart);
     
 ALU: ALU_with_pipeline generic map(VLMAX, SEW_MAX, lgSEW_MAX, XLEN, VLEN)
                            port map(clk,rst,busy,s_mask_bit,

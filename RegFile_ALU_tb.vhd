@@ -114,14 +114,14 @@ begin
     end process;
     
     process begin
-        rst<= '1';
+        rst<= '1'; busy<= '0';
         newInst<='0'; sew <= "01000"; vl <= x"00000004"; vstart <= x"00000000";
         Idata_1<= "00001"; Idata_2<= "00001";
         WriteEn_i_1<='1'; Xdata_1<= x"00000004"; WriteDest1<="00000";
         WriteEn_i_2<='1'; Xdata_2<= x"00000008"; WriteDest2<="10000";
         RegSel1<="00000"; RegSel2<="00001"; RegSel3<= "10000"; RegSel4<= "10001";
         op2_src_1<= "01"; op2_src_2<= "01"; funct6_1<= "000000"; funct6_2<= "000000"; funct3_1<="000"; funct3_2<="000";   
-        wait for 10ns; newInst<='1'; wait for 5ns; newInst<= '0'; wait for 5ns;
+        wait for 10ns; newInst<='1'; rst<='0'; wait for 5ns; newInst<= '0'; wait for 5ns;
         
         wait;
     end process;

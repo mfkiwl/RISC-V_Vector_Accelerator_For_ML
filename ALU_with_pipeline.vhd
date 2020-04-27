@@ -12,6 +12,7 @@ entity ALU_with_pipeline is
     Port (  clk: in STD_LOGIC; 
             rst: in STD_LOGIC;
             busy: in STD_LOGIC;
+            mask_in: in STD_LOGIC;
             Xdata_1: in STD_LOGIC_VECTOR(XLEN-1 downto 0); --data from scalar register for Lane 1
             Xdata_2: in STD_LOGIC_VECTOR(XLEN-1 downto 0); --data from scalar register for Lane 2
             Vdata1_1: in STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --data coming from vector register to Lane 1
@@ -35,8 +36,7 @@ entity ALU_with_pipeline is
             WriteEn_o_1: out STD_LOGIC; --WriteEn for Lane 1 out to Register File
             WriteEn_o_2: out STD_LOGIC; --WriteEn for Lane 2 out to Register File
             result_1: out STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --result from Lane 1
-            result_2: out STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --result from Lane 2
-            mask_in: in STD_LOGIC
+            result_2: out STD_LOGIC_VECTOR(SEW_MAX-1 downto 0) --result from Lane 2
             );
 end ALU_with_pipeline;
 

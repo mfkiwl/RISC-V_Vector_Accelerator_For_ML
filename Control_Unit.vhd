@@ -50,11 +50,12 @@ entity Control_Unit is
            --------------------------------------------
            --------------------------------------------
            -- Fields INPUT: (from decoder)
-           cu_funct3:in STD_LOGIC_VECTOR(2 downto 0);
+           cu_funct3:in STD_LOGIC_VECTOR(2 downto 0); -- also acts as width field for mem operations
            cu_rs1: in STD_LOGIC_VECTOR(4 downto 0);
            cu_rs2: in STD_LOGIC_VECTOR(4 downto 0);
            cu_rd:  in STD_LOGIC_VECTOR(4 downto 0);
            cu_opcode : in STD_LOGIC_VECTOR (6 downto 0);
+           cu_mop : in STD_LOGIC_VECTOR (2 downto 0);          
            cu_bit31: in STD_LOGIC; --used for vsetvl and vsetvli instructions
            --------------------------------------------
            -- vset Related Signals:
@@ -70,11 +71,21 @@ entity Control_Unit is
                                     -- 00 = ??
            cu_MemWrite : out STD_LOGIC;-- enables write to memory
            cu_MemRead: out STD_LOGIC; -- enables read from memory
-           cu_WBSrc : out STD_LOGIC);-- selects if wrbsc is from ALU or mem 
+           cu_WBSrc : out STD_LOGIC;-- selects if wrbsc is from ALU or mem 
                                      -- 0 = ALU
                                      -- 1 = Mem
+           cu_extension: out STD_LOGIC; -- goes to memory
+                                        -- 0 if zero extended
+                                        -- 1 if sign extended    
+           cu_addrmode: out STD_LOGIC_VECTOR(1 downto 0); -- goes to memory lane
+                                                          -- 00 if unit stride    
+                                                          -- 01 if strided
+                                                          -- 10 if indexed (unordered in case of a store)
+                                                          -- 11 if indexed (ordered in case of a store)
+           cu_memwidth: out STD_LOGIC_VECTOR(lgSEW_MAX downto 0) -- goes to memory 
+                                                                 -- number of bits/transfer                                              
            --------------------------------------------
-           
+           );
 end Control_Unit;
 
 
@@ -169,7 +180,10 @@ begin
         cu_MemWrite<='0'; 
         cu_MemRead<='0';
         cu_SrcB<="00"; -- dont care
-        cu_WBSrc<='0'; -- dont care                  
+        cu_WBSrc<='0'; -- dont care  
+        cu_extension<='0'; --dont care
+        cu_addrmode<="00"; -- dont care  
+        cu_memwidth<=(others=>'0');              
         if (busy='0') then
             case cu_opcode is
             --Case 1: ALU Operation
@@ -197,14 +211,41 @@ begin
                                  cu_MemWrite<='0'; 
                                  cu_MemRead<='1';
                                  cu_SrcB<="00";
-                                 cu_WBSrc<='1';                                
+                                 cu_WBSrc<='1';
+                                 if (cu_mop="000" or cu_mop="010" or cu_mop="011") then --load mop addressing
+                                      cu_extension<='0'; 
+                                 elsif(cu_mop="100" or cu_mop="110" or cu_mop="111") then
+                                      cu_extension<='1';                                                       
+                                 end if; 
+                                 cu_addrmode<=cu_mop(1 downto 0);
+                                 if (cu_funct3="000")then -- 8 bits/transfer
+                                    cu_memwidth<="001000";
+                                 elsif (cu_funct3="101")then -- 16 bits/transfer
+                                    cu_memwidth<="010000";   
+                                 elsif (cu_funct3="110")then -- 32 bits/transfer
+                                    cu_memwidth<="100000"; 
+                                 elsif (cu_funct3="111")then -- sew bits/transfer 
+                                    cu_memwidth(lgSEW_MAX)<='0';
+                                    cu_memwidth(lgSEW_MAX-1 downto 0)<=std_logic_vector(to_unsigned(2**(to_integer(unsigned(vtype( 4 downto 2)))+3),lgSEW_MAX));                                                                       
+                                 end if;                                                                                                                                                                                          
              --Case 3: Store Operation
                 when "0100111" => cu_WriteEn<='0';
                                  cu_MemWrite<='1';
                                  cu_MemRead<='0';
                                  cu_SrcB<="00";
                                  cu_WBSrc<='0'; 
-                                 
+                                 cu_addrmode<=cu_mop(1 downto 0); 
+                                 if (cu_funct3="000")then -- 8 bits/transfer
+                                    cu_memwidth<="001000";
+                                 elsif (cu_funct3="101")then -- 16 bits/transfer
+                                    cu_memwidth<="010000";   
+                                 elsif (cu_funct3="110")then -- 32 bits/transfer
+                                    cu_memwidth<="100000"; 
+                                 elsif (cu_funct3="111")then -- sew bits/transfer 
+                                    cu_memwidth(lgSEW_MAX)<='0';
+                                    cu_memwidth(lgSEW_MAX-1 downto 0)<=std_logic_vector(to_unsigned(2**(to_integer(unsigned(vtype( 4 downto 2)))+3),lgSEW_MAX));                                                                       
+                                 end if; 
+                                                                                                  
                 when others   => cu_WriteEn<='0';
                                  cu_MemWrite<='0'; 
                                  cu_MemRead<='0';

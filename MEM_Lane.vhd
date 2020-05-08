@@ -10,15 +10,18 @@ generic (
     VLEN:integer:=32 --number of bits in register
 );
 Port (
+    clk: in STD_LOGIC;
     mask_bit: in STD_LOGIC;
     vm: in STD_LOGIC; --indicates if masked operation or not
-    rs1: in STD_LOGIC_VECTOR(4 downto 0); -- contains base effective address
-    rs2: in STD_LOGIC_VECTOR(4 downto 0); -- contains stride offset incase of strided operation
-    vs2: in STD_LOGIC_VECTOR(4 downto 0); -- 
-    mop: in STD_LOGIC_VECTOR(2 downto 0); -- addressing modes 
-    --
-    --
-    --
+    addrmode: in STD_LOGIC_VECTOR(1 downto 0); -- 00 if unit stride    
+                                               -- 01 if strided
+                                               -- 10 if indexed (unordered in case of a store)
+                                               -- 11 if indexed (ordered in case of a store)   
+    width: in STD_LOGIC_VECTOR(lgSEW_MAX-1 downto 0); -- necessary for reading and writing properly 
+    vl: in STD_LOGIC_VECTOR(XLEN-1 downto 0); -- used for counter                                         
+    rs1_data: in STD_LOGIC_VECTOR(XLEN-1 downto 0); -- contains base effective address
+    rs2_data: in STD_LOGIC_VECTOR(XLEN-1 downto 0); -- contains stride offset incase of strided operation
+    vs2_data: in STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --   
     lumop: in STD_LOGIC_VECTOR(4 downto 0); --additional addressing field
     -- 00000: unit stride
     -- 01000: unit stride, whole registers
@@ -26,24 +29,35 @@ Port (
     sumop: in STD_LOGIC_VECTOR(4 downto 0);  --additional addressing field
     -- 00000: unit stride
     -- 01000: unit stride, whole registers
-   width_in: in STD_LOGIC_VECTOR(2 downto 0 );
-   -- 000: 8 bits/transfer
-   -- 101: 16 bits/transfer
-   -- 110: 32 bits/transfer
-   -- 111: sew bits/transfer
-   width_out: out STD_LOGIC_VECTOR(lgSEW_MAX-1 downto 0); -- to be used for memory bank
-   sew: in STD_LOGIC_VECTOR(lgSEW_MAX-1 downto 0); -- determines width of memory transfer
-   mem_address: out STD_LOGIC_VECTOR(XLEN-1 downto 0)
+    mem_address: out STD_LOGIC_VECTOR(XLEN-1 downto 0)
  );
 end MEM_Lane;
 
 architecture Behavioral of MEM_Lane is
-
+signal address: STD_LOGIC_VECTOR(XLEN-1 downto 0); -- stores the address reached so far
+signal width_int:integer;
+signal counter:integer:=0; -- counts the number of elements
+signal vl_int:integer;
 begin
-
-width_out<="01000" when width_in="000" else -- 8 bits
-           "10000" when width_in="000" else -- 16 bits
-                                            -- still missing 32 bit case
-           sew     when width_in="111";
-
+    vl_int<= to_integer(unsigned(vl));    
+    width_int<= to_integer(unsigned(width));
+    process (clk,addrmode,rs1_data,rs2_data,vs2_data)
+    
+    begin
+        
+        if rising_edge(clk) AND (counter<vl_int) then
+            if (counter=0) then
+                address<=rs1_data;
+            else
+            case addrmode is
+                when "00"=>  address<=std_logic_vector(unsigned(address)+width_int);                                                   
+                when "01"=>  address<=std_logic_vector(unsigned(address)+unsigned(rs2_data));
+                when "10"=>  address<=std_logic_vector(unsigned(address)+unsigned(vs2_data)); 
+                when "11"=>  -- nami               
+                end case;
+            end if;
+            counter<=counter+1;
+        end if;
+    end process;
+    mem_address<=address;         
 end Behavioral;

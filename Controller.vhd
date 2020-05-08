@@ -58,7 +58,19 @@ entity Controller is
     vs2_rs2 : out STD_LOGIC_VECTOR (4 downto 0);
     rs1 : out STD_LOGIC_VECTOR (4 downto 0);
     funct3_width : out STD_LOGIC_VECTOR (2 downto 0);
-    vd_vs3 : out STD_LOGIC_VECTOR (4 downto 0)                                                 
+    vd_vs3 : out STD_LOGIC_VECTOR (4 downto 0);
+    mv: out STD_LOGIC;   
+    extension: out STD_LOGIC;        -- goes to memory
+                                        -- 0 if zero extended
+                                        -- 1 if sign extended    
+    addrmode: out STD_LOGIC_VECTOR(1 downto 0); -- goes to memory lane
+                                                          -- 00 if unit stride    
+                                                          -- 01 if strided
+                                                          -- 10 if indexed (unordered in case of a store)
+                                                          -- 11 if indexed (ordered in case of a store)
+    memwidth: out STD_LOGIC_VECTOR(lgSEW_MAX downto 0) -- goes to memory 
+                                                                 -- number of bits/transfer    
+                                                  
     );
 end Controller;
 
@@ -86,10 +98,10 @@ component Control_Unit is
            --------------------------------------------
            --Control Registers INPUT:
            CSR_Addr: in STD_LOGIC_VECTOR ( 11 downto 0);   -- reg address of the CSR
-                                                           -- 11 is based on spec sheet
+                                                           -- 11 is based on spec sheet (0xABC)
            CSR_WD: in STD_LOGIC_VECTOR (XLEN-1 downto 0);
-           CSR_WEN: in STD_LOGIC;
-           CSR_REN: in STD_LOGIC; 
+           CSR_WEN: in STD_LOGIC; --for testing purposes to write to CSRs
+           CSR_REN: in STD_LOGIC; --for testing purposes to read from CSRs
            --------------------------------------------
            --Control Registers OUTPUT:
            CSR_out: out STD_LOGIC_VECTOR (XLEN-1 downto 0);
@@ -107,15 +119,16 @@ component Control_Unit is
            --- 4) vl fields:   
 
            cu_vl: out STD_LOGIC_VECTOR(XLEN-1 downto 0);      
-           --vl has no fields; it is a read only register that holds the number of elements to be updated by an instruction    
+           --vl has no fields; it is a read only register that holds the number of elements to be updated by an instruction
            --------------------------------------------
            --------------------------------------------
            -- Fields INPUT: (from decoder)
-           cu_funct3:in STD_LOGIC_VECTOR(2 downto 0);
+           cu_funct3:in STD_LOGIC_VECTOR(2 downto 0); -- also acts as width field for mem operations
            cu_rs1: in STD_LOGIC_VECTOR(4 downto 0);
            cu_rs2: in STD_LOGIC_VECTOR(4 downto 0);
            cu_rd:  in STD_LOGIC_VECTOR(4 downto 0);
            cu_opcode : in STD_LOGIC_VECTOR (6 downto 0);
+           cu_mop : in STD_LOGIC_VECTOR (2 downto 0);          
            cu_bit31: in STD_LOGIC; --used for vsetvl and vsetvli instructions
            --------------------------------------------
            -- vset Related Signals:
@@ -131,12 +144,21 @@ component Control_Unit is
                                     -- 00 = ??
            cu_MemWrite : out STD_LOGIC;-- enables write to memory
            cu_MemRead: out STD_LOGIC; -- enables read from memory
-           cu_WBSrc : out STD_LOGIC);-- selects if wrbsc is from ALU or mem 
+           cu_WBSrc : out STD_LOGIC;-- selects if wrbsc is from ALU or mem 
                                      -- 0 = ALU
                                      -- 1 = Mem
-                                     
+           cu_extension: out STD_LOGIC; -- goes to memory
+                                        -- 0 if zero extended
+                                        -- 1 if sign extended    
+           cu_addrmode: out STD_LOGIC_VECTOR(1 downto 0); -- goes to memory lane
+                                                          -- 00 if unit stride    
+                                                          -- 01 if strided
+                                                          -- 10 if indexed (unordered in case of a store)
+                                                          -- 11 if indexed (ordered in case of a store)
+           cu_memwidth: out STD_LOGIC_VECTOR(lgSEW_MAX downto 0) -- goes to memory 
+                                                                 -- number of bits/transfer                                              
            --------------------------------------------
-           
+           );
 end component;
 
 component Decoder is
@@ -158,6 +180,8 @@ end component;
 --Signals 
            -- Fields INPUT: (from decoder)
  signal           funct3_sig: STD_LOGIC_VECTOR(2 downto 0);
+ signal           mop_sig: STD_LOGIC_VECTOR(2 downto 0);
+ signal           funct6_sig: STD_LOGIC_VECTOR(5 downto 0);
  signal           rs1_sig:  STD_LOGIC_VECTOR(4 downto 0);
  signal           rs2_sig:  STD_LOGIC_VECTOR(4 downto 0);
  signal           rd_sig:   STD_LOGIC_VECTOR(4 downto 0);
@@ -167,15 +191,22 @@ end component;
            --------------------------------------------
 begin
 
-Dec: Decoder PORT MAP (vect_inst,funct6,bit31_sig,nf,mop,vm,rs2_sig,rs1_sig,funct3_sig,rd_sig,opcode_sig);
+Dec: Decoder PORT MAP (vect_inst,funct6_sig,bit31_sig,nf,mop,vm,rs2_sig,rs1_sig,funct3_sig,rd_sig,opcode_sig);
 
 CU:  Control_Unit 
 GENERIC MAP(XLEN,ELEN,VLEN,SEW_MAX,lgSEW_MAX,VLMAX,logVLMAX)
-PORT MAP (clk_in,busy,CSR_Addr,CSR_WD,CSR_WEN, CSR_REN, CSR_out,vill,vediv,vlmul,sew,vstart,vl,funct3_sig,rs1_sig,rs2_sig,rd_sig,opcode_sig,bit31_sig,rs1_data,rd_data,WriteEn,SrcB,MemWrite,MemRead,WBSrc);
+PORT MAP (clk_in,busy,CSR_Addr,CSR_WD,CSR_WEN, CSR_REN,
+          CSR_out,vill,vediv,vlmul,sew,vstart,vl,
+          funct3_sig,rs1_sig,rs2_sig,rd_sig,opcode_sig,mop_sig,bit31_sig,rs1_data,rd_data,
+          WriteEn,SrcB,MemWrite,MemRead,WBSrc,extension,addrmode,memwidth);
 
+funct6<=funct6_sig;
 funct3_width<=funct3_sig;
 rs1<=rs1_sig;
 vs2_rs2<=rs2_sig;
 vd_vs3<=rd_sig;
+
+mv<='1' when funct6_sig = "010111" else '0'; -- To be used in Regfile
+
 
 end Controller_arch;

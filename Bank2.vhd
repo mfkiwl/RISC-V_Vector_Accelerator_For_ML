@@ -32,7 +32,7 @@ end Bank2;
 architecture Bank2_arch of Bank2 is
     type registerFile is array(0 to (2**(RegNum-1)-1)) of std_logic_vector(VLEN-1 downto 0);   
     signal registers : registerFile;
-
+    
     signal sew_int: integer;
     signal vl_int: integer;
 begin
@@ -46,7 +46,7 @@ begin
     begin
         if(newInst = '1') then elements_read:=to_integer(unsigned(vstart)); elements_written:=to_integer(unsigned(vstart)); read_counter:=to_integer(unsigned(vstart))*sew_int; write_counter:=to_integer(unsigned(vstart))*sew_int; end if; --new instruction from dispatcher, reset counters
 
-        if rising_edge(clk) then                                 
+        if falling_edge(clk) then                                 
             if WriteEn = '1' then
                 --Write 
                 if(elements_written < vl_int) then
@@ -55,7 +55,7 @@ begin
                     elements_written:= elements_written+1;
                 end if;
             end if;
-        elsif falling_edge(clk) then
+        elsif rising_edge(clk) then
             if(elements_read < vl_int) then
                 out1<= std_logic_vector(resize( signed((registers(to_integer(unsigned(RegSel1))) ((read_counter+sew_int-1) downto read_counter)) ), out1'length));
                 out2<= std_logic_vector(resize( signed((registers(to_integer(unsigned(RegSel2))) ((read_counter+sew_int-1) downto read_counter)) ), out2'length));

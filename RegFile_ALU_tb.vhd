@@ -36,23 +36,18 @@ component RegFile_ALU is
             funct3_2: in STD_LOGIC_VECTOR(2 downto 0); --to know which operation
             WriteEn_i_1: in STD_LOGIC; --WriteEn for Lane 1 from controller
             WriteEn_i_2: in STD_LOGIC; --WriteEn for Lane 2 from controller
-            result_1: out STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --result from Lane 1 (to remove)
-            result_2: out STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --result from Lane 2 (to remove) 
             ------Register File
             sew: in STD_LOGIC_VECTOR (lgSEW_MAX-1 downto 0);
             vl: in STD_LOGIC_VECTOR(XLEN-1 downto 0);
             vstart: in STD_LOGIC_VECTOR(XLEN-1 downto 0);
             newInst: in STD_LOGIC;
-            op1_1 : out STD_LOGIC_VECTOR (SEW_MAX-1 downto 0); --(to remove)
-            op2_1 : out STD_LOGIC_VECTOR (SEW_MAX-1 downto 0); --(to remove)
-            op1_2 : out STD_LOGIC_VECTOR (SEW_MAX-1 downto 0); --(to remove)
-            op2_2 : out STD_LOGIC_VECTOR (SEW_MAX-1 downto 0); --(to remove)
             RegSel1 : in STD_LOGIC_VECTOR (RegNum-1 downto 0);
             RegSel2 : in STD_LOGIC_VECTOR (RegNum-1 downto 0);
             RegSel3 : in STD_LOGIC_VECTOR (RegNum-1 downto 0);
             RegSel4 : in STD_LOGIC_VECTOR (RegNum-1 downto 0);
             WriteDest1 : in STD_LOGIC_VECTOR (RegNum-1 downto 0);
-            WriteDest2 : in STD_LOGIC_VECTOR (RegNum-1 downto 0)
+            WriteDest2 : in STD_LOGIC_VECTOR (RegNum-1 downto 0);
+            ld_RF: in STD_LOGIC --mux select to fill RF
 );
 end component;
 
@@ -79,32 +74,26 @@ signal  funct6_2:  STD_LOGIC_VECTOR(5 downto 0); --to know which operation
 signal  funct3_1:  STD_LOGIC_VECTOR(2 downto 0); --to know which operation
 signal  funct3_2:  STD_LOGIC_VECTOR(2 downto 0); --to know which operation
 signal  WriteEn_i_1: STD_LOGIC; --WriteEn for Lane 1 from controller
-signal  WriteEn_i_2: STD_LOGIC; --WriteEn for Lane 2 from controller
-signal  result_1: STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --result from Lane 1 (to remove)
-signal  result_2: STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --result from Lane 2 (to remove) 
+signal  WriteEn_i_2: STD_LOGIC; --WriteEn for Lane 2 from controller 
 ---Register File
 signal  sew: STD_LOGIC_VECTOR (lgSEW_MAX-1 downto 0);
 signal  vl: STD_LOGIC_VECTOR(XLEN-1 downto 0);
 signal  vstart: STD_LOGIC_VECTOR(XLEN-1 downto 0);
 signal  newInst: STD_LOGIC;
-signal  op1_1 : STD_LOGIC_VECTOR (SEW_MAX-1 downto 0); --(to remove)
-signal  op2_1 : STD_LOGIC_VECTOR (SEW_MAX-1 downto 0); --(to remove)
-signal  op1_2 : STD_LOGIC_VECTOR (SEW_MAX-1 downto 0); --(to remove)
-signal  op2_2 : STD_LOGIC_VECTOR (SEW_MAX-1 downto 0); --(to remove)
 signal  RegSel1 : STD_LOGIC_VECTOR (RegNum-1 downto 0);
 signal  RegSel2 : STD_LOGIC_VECTOR (RegNum-1 downto 0);
 signal  RegSel3 : STD_LOGIC_VECTOR (RegNum-1 downto 0);
 signal  RegSel4 : STD_LOGIC_VECTOR (RegNum-1 downto 0);
 signal  WriteDest1 : STD_LOGIC_VECTOR (RegNum-1 downto 0);
 signal  WriteDest2 : STD_LOGIC_VECTOR (RegNum-1 downto 0);
+signal ld_RF: STD_LOGIC;
 
 begin
     UUT: RegFile_ALU GENERIC MAP(VLMAX,RegNum,SEW_MAX,lgSEW_MAX,XLEN,VLEN)
     PORT MAP(clk,rst,busy,
              Xdata_1, Xdata_2, Idata_1, Idata_2, 
              op2_src_1, op2_src_2, funct6_1, funct6_2, funct3_1, funct3_2, WriteEn_i_1, WriteEn_i_2,
-             result_1, result_2, 
-             sew, vl, vstart, newInst, op1_1, op2_1, op1_2, op2_2, RegSel1, RegSel2, RegSel3, RegSel4, WriteDest1, WriteDest2);
+             sew, vl, vstart, newInst, RegSel1, RegSel2, RegSel3, RegSel4, WriteDest1, WriteDest2,ld_RF);
     
     clk_proc: process begin
         clk<='0';
@@ -114,15 +103,16 @@ begin
     end process;
     
     process begin
-        rst<= '1'; busy<= '0';
+        rst<= '1'; busy<= '0'; ld_RF<= '0';
         newInst<='0'; sew <= "01000"; vl <= x"00000004"; vstart <= x"00000000";
         Idata_1<= "00001"; Idata_2<= "00001";
         WriteEn_i_1<='1'; Xdata_1<= x"00000004"; WriteDest1<="00000";
         WriteEn_i_2<='1'; Xdata_2<= x"00000008"; WriteDest2<="10000";
         RegSel1<="00000"; RegSel2<="00001"; RegSel3<= "10000"; RegSel4<= "10001";
-        op2_src_1<= "01"; op2_src_2<= "01"; funct6_1<= "000000"; funct6_2<= "000000"; funct3_1<="000"; funct3_2<="000";   
-        wait for 10ns; newInst<='1'; rst<='0'; wait for 5ns; newInst<= '0'; wait for 5ns;
-        
+        op2_src_1<= "01"; op2_src_2<= "01"; funct6_1<= "010111"; funct6_2<= "010111"; funct3_1<="000"; funct3_2<="000";   
+        wait for 10ns; rst<='0'; wait for 15ns;  Xdata_2<= x"00000003"; newInst<='1'; wait for 5ns; newInst<= '0'; wait for 5ns; Xdata_2<= x"00000003";
+        wait for 25ns; WriteEn_i_2<='0'; wait for 40ns; funct6_1<="000000"; funct6_2<="000000"; wait for 10ns; funct6_1<="000000"; funct6_2<="000000";  Xdata_1<= x"00000005"; Xdata_2<= x"00000006";
+        wait for 15ns; newInst<='1'; wait for 5ns; newInst<= '0'; wait for 5ns; WriteEn_i_2<='1'; 
         wait;
     end process;
 

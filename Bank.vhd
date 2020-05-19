@@ -1,7 +1,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use ieee.numeric_std.all;
-entity Bank2 is
+entity Bank is
 
     generic (
            -- Max Vector Length (max number of elements) 
@@ -27,9 +27,9 @@ entity Bank2 is
            vl: in STD_LOGIC_VECTOR(XLEN-1 downto 0);
            vstart: in STD_LOGIC_VECTOR(XLEN-1 downto 0)
            );
-end Bank2;
+end Bank;
 
-architecture Bank2_arch of Bank2 is
+architecture Bank_arch of Bank is
     type registerFile is array(0 to (2**(RegNum-1)-1)) of std_logic_vector(VLEN-1 downto 0);   
     signal registers : registerFile;
     
@@ -64,4 +64,4 @@ begin
             end if;
         end if;
     end process;
-end Bank2_arch;
+end Bank_arch;

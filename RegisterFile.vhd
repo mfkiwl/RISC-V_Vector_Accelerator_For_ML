@@ -63,7 +63,7 @@ architecture RegFile_arch of RegisterFile is
            );
 end component;
 
-component Bank2 is
+component Bank is
 
     generic (
            -- Max Vector Length (max number of elements) 
@@ -192,7 +192,7 @@ begin
         end if;
     end process;
     
-    BankA: Bank2 GENERIC MAP(VLMAX, RegNum, SEW_MAX, lgSEW_MAX, XLEN, VLEN)
+    BankA: Bank GENERIC MAP(VLMAX, RegNum, SEW_MAX, lgSEW_MAX, XLEN, VLEN)
     PORT MAP(clk, newInst, out1, out2, RegSelA1, RegSelA2, WriteEn1, WriteData1, WriteDestA, sew, vl, vstart);
     
     BankB: Bank1 GENERIC MAP(VLMAX, RegNum, SEW_MAX, lgSEW_MAX, XLEN, VLEN)

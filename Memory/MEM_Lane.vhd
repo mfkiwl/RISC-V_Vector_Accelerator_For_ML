@@ -50,10 +50,10 @@ begin
                 address<=rs1_data;
             else
             case addrmode is
-                when "00"=>  address<=std_logic_vector(unsigned(address)+width_int);                                                   
+                when "00"=>  address<=std_logic_vector(unsigned(address)+width_int/8);                                                   
                 when "01"=>  address<=std_logic_vector(unsigned(address)+unsigned(rs2_data));
                 when "10"=>  address<=std_logic_vector(unsigned(address)+unsigned(vs2_data)); 
-                when "11"=>  -- nami               
+                when "11"=>  -- unordered is an optimization, won't be implemented now               
                 end case;
             end if;
             counter<=counter+1;

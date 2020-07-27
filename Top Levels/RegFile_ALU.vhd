@@ -31,23 +31,18 @@ entity RegFile_ALU is
             funct3_2: in STD_LOGIC_VECTOR(2 downto 0); --to know which operation
             WriteEn_i_1: in STD_LOGIC; --WriteEn for Lane 1 from controller
             WriteEn_i_2: in STD_LOGIC; --WriteEn for Lane 2 from controller
-            result_1: out STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --result from Lane 1 (to remove)
-            result_2: out STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --result from Lane 2 (to remove) 
             ------Register File
             sew: in STD_LOGIC_VECTOR (lgSEW_MAX-1 downto 0);
             vl: in STD_LOGIC_VECTOR(XLEN-1 downto 0);
             vstart: in STD_LOGIC_VECTOR(XLEN-1 downto 0);
             newInst: in STD_LOGIC;
-            op1_1 : out STD_LOGIC_VECTOR (SEW_MAX-1 downto 0); --(to remove)
-            op2_1 : out STD_LOGIC_VECTOR (SEW_MAX-1 downto 0); --(to remove)
-            op1_2 : out STD_LOGIC_VECTOR (SEW_MAX-1 downto 0); --(to remove)
-            op2_2 : out STD_LOGIC_VECTOR (SEW_MAX-1 downto 0); --(to remove)
             RegSel1 : in STD_LOGIC_VECTOR (RegNum-1 downto 0);
             RegSel2 : in STD_LOGIC_VECTOR (RegNum-1 downto 0);
             RegSel3 : in STD_LOGIC_VECTOR (RegNum-1 downto 0);
             RegSel4 : in STD_LOGIC_VECTOR (RegNum-1 downto 0);
             WriteDest1 : in STD_LOGIC_VECTOR (RegNum-1 downto 0);
-            WriteDest2 : in STD_LOGIC_VECTOR (RegNum-1 downto 0)
+            WriteDest2 : in STD_LOGIC_VECTOR (RegNum-1 downto 0);
+            ld_RF: in STD_LOGIC --mux select to fill RF
 );
 end RegFile_ALU;
 
@@ -129,24 +124,28 @@ signal     s_op1_1: STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
 signal     s_op2_1: STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
 signal     s_op1_2: STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
 signal     s_op2_2: STD_LOGIC_VECTOR(SEW_MAX-1 downto 0);
-signal     s_result_1: STD_LOGIC_VECTOR(SEW_MAX-1 downto 0);
-signal     s_result_2: STD_LOGIC_VECTOR(SEW_MAX-1 downto 0);
+signal     s_result_1: STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --ALU lane 1 output 
+signal     s_result_2: STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --ALU lane 2 output
 signal     s_WriteEn_1: STD_LOGIC; 
 signal     s_WriteEn_2: STD_LOGIC;
 signal     s_mask_bit: STD_LOGIC;
+signal     RF_wd_mux_1: STD_LOGIC_VECTOR(SEW_MAX-1 downto 0);
+signal     RF_wd_mux_2: STD_LOGIC_VECTOR(SEW_MAX-1 downto 0);
+
 begin
 
 
 RF: RegisterFile GENERIC MAP(VLMAX,RegNum,SEW_MAX,lgSEW_MAX,XLEN,VLEN)
-    PORT MAP(clk,newInst,s_op1_1,s_op2_1,s_op1_2,s_op2_2,s_mask_bit,RegSel1,RegSel2,RegSel3,RegSel4,s_WriteEn_1,s_WriteEn_2,s_result_1,WriteDest1,s_result_2,WriteDest2,sew,vl,vstart);
+    PORT MAP(clk,newInst,s_op1_1,s_op2_1,s_op1_2,s_op2_2,s_mask_bit,RegSel1,RegSel2,RegSel3,RegSel4,s_WriteEn_1,s_WriteEn_2,RF_wd_mux_1,WriteDest1,RF_wd_mux_2,WriteDest2,sew,vl,vstart);
     
 ALU: ALU_with_pipeline generic map(VLMAX, SEW_MAX, lgSEW_MAX, XLEN, VLEN)
                            port map(clk,rst,busy,s_mask_bit,
                                     Xdata_1,Xdata_2,s_op1_1,s_op2_1,s_op1_2,s_op2_2,Idata_1,Idata_2,
                                     op2_src_1,op2_src_2,funct6_1,funct6_2,funct3_1,funct3_2,WriteEn_i_1,WriteEn_i_2,s_WriteEn_1,s_WriteEn_2,s_result_1, s_result_2);
 
-result_1<= s_result_1; result_2<= s_result_2; 
-op1_1<= s_op1_1; op2_1<= s_op2_1; op1_2<= s_op1_2; op2_2<= s_op2_2;
+RF_wd_mux_1<= s_result_1 when ld_RF='0' else Xdata_1;
+RF_wd_mux_2<= s_result_2 when ld_RF='0' else Xdata_2;
+
 
  
 end Structural;

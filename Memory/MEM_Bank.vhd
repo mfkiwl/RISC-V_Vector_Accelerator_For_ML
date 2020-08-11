@@ -30,7 +30,7 @@ architecture Behavioral of MEM_Bank is
    signal width_int:integer;
 begin
     width_int<= to_integer(unsigned(width));
-    process(clk, MemAddr,MemRead,MemWrite)
+    process(clk, MemAddr,MemRead,MemWrite,data)
     begin
         if rising_edge(clk) then
             if (MemWrite = '1') then

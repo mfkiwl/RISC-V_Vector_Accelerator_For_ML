@@ -12,6 +12,7 @@ generic (
 );
   Port (
     clk: in STD_LOGIC;
+    newInst: in STD_LOGIC;
     mask_bit: in STD_LOGIC;
     vm: in STD_LOGIC; --indicates if masked operation or not
     addrmode: in STD_LOGIC_VECTOR(1 downto 0); -- 00 if unit stride    
@@ -55,6 +56,7 @@ generic (
 );
 Port (
     clk: in STD_LOGIC;
+    newInst: in STD_LOGIC;
     mask_bit: in STD_LOGIC;
     vm: in STD_LOGIC; --indicates if masked operation or not
     addrmode: in STD_LOGIC_VECTOR(1 downto 0); -- 00 if unit stride    
@@ -113,10 +115,10 @@ Bank2: MEM_Bank GENERIC MAP(BRAM_SIZE,SEW_MAX,lgSEW_MAX,XLEN,VLEN)
                 PORT MAP (clk,MemRead_2,MemWrite_2,s_MemAddr_2,ReadPort_2,WritePort_2,width,extension);
 
 Lane1: MEM_Lane GENERIC MAP(SEW_MAX,lgSEW_MAX,XLEN,VLEN)
-                PORT MAP(clk,mask_bit,vm,addrmode,width,vl,rs1_data_1,rs2_data_1,vs2_data_1,lumop_1,sumop_1,s_mem_address_1);
+                PORT MAP(clk,newInst,mask_bit,vm,addrmode,width,vl,rs1_data_1,rs2_data_1,vs2_data_1,lumop_1,sumop_1,s_mem_address_1);
                 
 Lane2: MEM_Lane GENERIC MAP(SEW_MAX,lgSEW_MAX,XLEN,VLEN)
-                PORT MAP(clk,mask_bit,vm,addrmode,width,vl,rs1_data_1,rs2_data_1,vs2_data_1,lumop_1,sumop_1,s_mem_address_1); 
+                PORT MAP(clk,newInst,mask_bit,vm,addrmode,width,vl,rs1_data_2,rs2_data_2,vs2_data_2,lumop_2,sumop_2,s_mem_address_2); 
 
 s_MemAddr_1<=s_mem_address_1(9 downto 0);  
 s_MemAddr_2<=s_mem_address_2(9 downto 0);                                          

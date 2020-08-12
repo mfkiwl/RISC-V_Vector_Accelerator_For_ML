@@ -44,8 +44,9 @@ begin
     process (clk,addrmode,rs1_data,rs2_data,vs2_data)
         variable counter:integer:=0; -- counts the number of elements
     begin
+    if rising_edge(clk) then
         if(newInst='1') then counter:=0; end if; --reset counter
-        if rising_edge(clk) AND (counter<vl_int) then
+        if(counter<vl_int) then
             if (counter=0) then
                 address<=rs1_data;
             else
@@ -53,11 +54,13 @@ begin
                     when "00"=>  address<=std_logic_vector(unsigned(address)+width_int/8);                                                   
                     when "01"=>  address<=std_logic_vector(unsigned(address)+unsigned(rs2_data));
                     when "10"=>  address<=std_logic_vector(unsigned(address)+unsigned(vs2_data)); 
-                    when "11"=>  -- unordered is an optimization, won't be implemented now               
+                    when "11"=>  -- unordered is an optimization, won't be implemented now
+                    when others => address<= (others=>'0');               
                 end case;
             end if;
             counter:=counter+1;
         end if;
+    end if;
     end process;
     mem_address<=address;         
 end Behavioral;

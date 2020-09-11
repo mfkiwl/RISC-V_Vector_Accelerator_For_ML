@@ -16,4 +16,4 @@ The decoder is a purely combinational circuit: it takes an instruction as input 
 
 ### Diagram
 
-![Decoder-Diagram](C:\Users\Hade\Desktop\RISC-V-Documentation\Images\Decoder.png)
+![Decoder-Diagram](../../images/Decoder.png)

@@ -18,4 +18,4 @@ Contrary to the ALU unit, the memory unit is clocked since it needs to increment
 
 ### Diagram
 
-![Memory-Unit](C:\Users\Hade\Desktop\RISC-V-Documentation\images\Memory-Unit.png)
+![Memory-Unit](../../images/Memory-Unit.png)

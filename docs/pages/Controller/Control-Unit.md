@@ -36,4 +36,4 @@ Here are the control signals used :
 
 ### Diagram
 
-![Decoder-Diagram](C:\Users\Hade\Desktop\RISC-V-Documentation\Images\Controller.png)
+![Decoder-Diagram](../../images/Controller.png)

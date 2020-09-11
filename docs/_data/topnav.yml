@@ -4,6 +4,6 @@ topnav:
 - title: Topnav
   items:
     - title: RISC-V Vector Processor Design
-      external_url: /Vector-Processor-Design-Overview
+      external_url: /Vector-Processor-Design-Overview.html
     - title: GitHub Repository
       external_url: https://github.com/imadassir/RISCV_Vector_Unit

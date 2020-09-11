@@ -28,4 +28,4 @@ Here are some details about our register file implementation:
 
 ### Diagram
 
-![Register File](C:\Users\Hade\Desktop\RISC-V-Documentation\Images\Register-File.png)
+![Register File](../../images/Register-File.png)

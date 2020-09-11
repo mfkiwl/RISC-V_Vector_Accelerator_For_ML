@@ -20,4 +20,4 @@ The memory is the address space where we store to/load from data. Similar to our
 
 ### Diagram
 
-![Memory](C:\Users\Hade\Desktop\RISC-V-Documentation\images\Memory.png)
+![Memory](../../images/Memory.png)

@@ -32,4 +32,4 @@ The circuit is purely combinational, just like the ALU. The mask bit is examined
 
 ### Overall Diagram for the ALU Unit
 
-![ALU-Unit](C:\Users\Hade\Desktop\RISC-V-Documentation\images\ALU-Unit.png)
+![ALU-Unit](../../images/ALU-Unit.png)

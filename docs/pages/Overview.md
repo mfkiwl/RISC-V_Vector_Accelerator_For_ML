@@ -1,10 +1,10 @@
 ---
-title: "Design Overview"
+title: "Vector Processor Design"
 keywords: 
 last_updated: 
 tags: 
 sidebar: riscv_vector_processor_design_sidebar
-permalink: Overview.html
+permalink: Vector-Processor-Design-Overview.html
 folder:
 ---
 

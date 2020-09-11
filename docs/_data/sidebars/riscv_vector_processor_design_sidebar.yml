@@ -58,14 +58,14 @@ entries:
     output: web
     folderitems:
     
-    - title: Reference of Decoder Instruction Fields, CSRs, and Generics.
+    - title: A - Reference of Decoder Instruction Fields, CSRs, and Generics.
       url: /Appendix-A.html
       output: web
       
-    - title: Currently Supported Instructions.
+    - title: B - Currently Supported Instructions.
       url: /Appendix-B.html
       output: web
       
-    - title: VHDL Code Structure
+    - title: C - VHDL Code Structure
       url: /Appendix-C.html
       output: web

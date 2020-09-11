@@ -1,15 +1,15 @@
-repository: imadassir/RISCV_Vector_Unit
+repository: imadassir/RISC-V_Vector_Accelerator_For_ML
 
 output: web
 # this property is useful for conditional filtering of content that is separate from the PDF.
 
-topnav_title: RISCV Vector Unit 
+topnav_title: RISC-V ML Vector Accelerator 
 # this appears on the top navigation bar next to the home button
 
-site_title: RISCV Vector Unit
+site_title: RISC-V ML Vector Accelerator
 # this appears in the html browser tab for the site title (seen mostly by search engines, not users)
 
-company_name: Imad Assir & Mohammad Iskandarini
+company_name: Imad Assir & Mohammad Iskandarini & Hadi Sandid
 # this appears in the footer
 
 github_editme_path: 
@@ -102,9 +102,9 @@ defaults:
 # these are defaults used for the frontmatter for these file types
 
 sidebars:
-- documentation_sidebar
+- riscv_vector_processor_design_sidebar
 
-description: "Website containing all documentation pertinent to the RISCV Vector Unit."
+description: "Website containing all documentation pertinent to the RISC-V ML Vector Accelerator."
 # the description is used in the feed.xml file
 
 # needed for sitemap.xml file only

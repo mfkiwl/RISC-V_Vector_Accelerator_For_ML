@@ -1,0 +1,71 @@
+# This is your sidebar TOC. The sidebar code loops through sections here and provides the appropriate formatting.
+
+entries:
+- title: sidebar
+  product: RISC-V Vector Processor Documentation
+  version: 
+  folders:
+  
+  - title: Controller
+    output: web
+    folderitems:
+    
+    - title: Decoder Design
+      url: /Decoder.html
+      output: web
+  
+    - title: Control Unit Design
+      url: /Control-Unit.html
+      output: web
+      
+  - title: Register File
+    output: web
+    folderitems:
+    
+    - title: Register File Design
+      url: /Register-File.html
+      output: web
+
+  - title: Arithmetic-Logic Unit
+    output: web
+    folderitems:
+    
+    - title: Arithmetic-Logic Unit Design
+      url: /ALU.html
+      output: web
+      
+  - title: Memory
+    output: web
+    folderitems:
+    
+    - title: Address Computation Unit ('Memory Unit') Design
+      url: /Address-Computation-Unit.html
+      output: web
+      
+    - title: Memory Design
+      url: /Memory.html
+      output: web
+      
+  - title: Chaining
+    output: web
+    folderitems:
+    
+    - title: Chaining Design
+      url: /Chaining.html
+      output: web
+      
+  - title: Appendices
+    output: web
+    folderitems:
+    
+    - title: Reference of Decoder Instruction Fields, CSRs, and Generics.
+      url: /Appendix-A.html
+      output: web
+      
+    - title: Currently Supported Instructions.
+      url: /Appendix-B.html
+      output: web
+      
+    - title: VHDL Code Structure
+      url: /Appendix-C.html
+      output: web

@@ -5,7 +5,7 @@ last_updated:
 tags: 
 sidebar: riscv_vector_processor_design_sidebar
 permalink: Vector-Processor-Design-Overview.html
-folder:
+folder: Overview
 ---
 
 This RISC-V Vector Unit Implementation has been realized in the scope of EECE-499, during the Spring 2018-2019 semester. It has been developed by team members Imad Assir and Mohammad El-Iskandarini, and supervised by Dr. Mazen Saghir.

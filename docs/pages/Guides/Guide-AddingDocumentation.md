@@ -49,7 +49,7 @@ folder: Guides
 
 ## Adding Documentation to the Website
 
-- Write your documentation in a Markdown file using your favourite text-editor (extension .md). There are many examples of existing documentation under `.../docs/pages`
+- Write your documentation in a Markdown file (extension .md) using your favourite text-editor . There are many examples of existing documentation under `.../docs/pages`
 - Add a YAML header to your documentation file. You can follow this template:
 
 ```YAML

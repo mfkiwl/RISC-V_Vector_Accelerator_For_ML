@@ -13,17 +13,17 @@ folder: Guides
 
 - Install Ruby+Devkit from [here](https://rubyinstaller.org/downloads/). Make sure to select a recent version including the DEVKIT (i.e.  One of the '*WITH DEVKIT*' downloads). Make sure to run the `ridk install` step on the last stage of the installation.
 
-<img src="../../images/tut_1.PNG" style="zoom: 67%;" />
+![](../../images/tut_1.PNG)
 
 - Add PATH variable pointing to `...\<Ruby Installation Folder>\bin`, this folder is usually located in `C:\<Ruby Version>\bin`
 
-<img src="../../images/tut_2.PNG" style="zoom:50%;" />
+![](../../images/tut_2.PNG)
 
-<img src="../../images/tut_3.PNG" style="zoom: 67%;" />
+![](../../images/tut_3.PNG)
 
-<img src="../../images/tut_4.PNG" style="zoom:67%;" />
+![](../../images/tut_4.PNG)
 
-<img src="../../images/tut_5.PNG" style="zoom:50%;" />
+![](../../images/tut_5.PNG)
 
 - Open a CMD session, and Install Jekyll and Bundler using the command  `gem install jekyll bundler`. To make sure that jekyll was properly installed, you can try to type `jekyll -v` and it will display your current jekyll version.
 
@@ -41,7 +41,7 @@ folder: Guides
 
 ![](../../images/tut_9.PNG)
 
-<img src="../../images/tut_10.PNG" style="zoom:50%;" />
+![](../../images/tut_10.PNG)
 
 ### Linux
 

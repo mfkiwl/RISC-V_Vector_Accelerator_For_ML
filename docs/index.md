@@ -3,6 +3,7 @@ title: "Configurable RISC-V Vector Accelerator for Machine Learning Applications
 keywords:
 tags:
 permalink: index.html
+hide_sidebar: true
 summary:
 ---
 

@@ -4,7 +4,8 @@ keywords:
 last_updated: 
 tags: 
 permalink: Adding_Documentation.html
-folder: Guides
+folder: General
+sidebar: fyp_information_sidebar
 ---
 
 ## Installing Ruby & Building Website locally

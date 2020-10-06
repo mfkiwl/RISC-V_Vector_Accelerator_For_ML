@@ -12,6 +12,4 @@ Weekly Minutes Reports are available for download on this page.
 
 ---
 
-- **02/10/2020** Report is available here.
-- **25/09/2020** Report is available here.
-- **18/09/2020** Report is available here.
+- **02/10/2020** Report is available [here](../../pdf/Weekly-Minutes-02-10-2020.pdf).

@@ -18,9 +18,6 @@ entries:
       url: /Weekly-Minutes.html
       output: web
       
-    - title: Tutorial on Adding Documentation
-      url: /Adding_Documentation.html
-      output: web
 
   - title: Meetings
     output: web
@@ -28,4 +25,12 @@ entries:
     
     - title: Oct. 7th 2020
       url: /meeting-7-10-2020.html
+      output: web
+      
+  - title: Other
+    output: web
+    folderitems:
+
+    - title: [How-To] Contributing to the Website
+      url: /Adding_Documentation.html
       output: web

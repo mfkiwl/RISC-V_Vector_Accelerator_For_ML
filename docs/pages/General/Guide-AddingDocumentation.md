@@ -1,5 +1,5 @@
 ---
-title: "Website Contribution"
+title: "Guide - Contributing to the Website"
 keywords: 
 last_updated: 
 tags: 

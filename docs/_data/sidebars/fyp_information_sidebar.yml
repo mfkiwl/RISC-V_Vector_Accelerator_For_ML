@@ -31,6 +31,6 @@ entries:
     output: web
     folderitems:
 
-    - title: [How-To] Contributing to the Website
+    - title: Contributing to the Website
       url: /Adding_Documentation.html
       output: web

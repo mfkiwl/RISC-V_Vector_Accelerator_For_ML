@@ -106,8 +106,10 @@ begin
     vs2_data_1<=x"00000000";vs2_data_2<=x"00000000";
     WritePort_1<=x"113262F1";WritePort_2<=x"111D23E6";
     MemRead_1<='0';MemRead_2<='0';
-    MemWrite_1<='1';MemWrite_2<='1'; wait for 5ns;
-    newInst<='1'; wait for 2ns;newInst<='0';wait for 3 ns;
+    MemWrite_1<='1';MemWrite_2<='1';
+    wait for 1ns;newInst<='1';
+    wait for 2ns;newInst<='0';wait for 3 ns;
+    wait for 10 ns;
     WritePort_1<=x"11326262";WritePort_2<=x"111D2323";  
     wait for 45ns;
     newInst<='1';

@@ -217,21 +217,21 @@ signal   vl_sig:  STD_LOGIC_VECTOR(XLEN-1 downto 0);
 begin
 
 Reg_AddrGen: RegFile_AddrGen GENERIC MAP(SEW_MAX,lgSEW_MAX,VLEN,XLEN,VLMAX,RegNum)
-                                 PORT MAP(i_clk,newInst,sew_sig,vm_sig,vstart_sig,o_done_1,o_done_2,mask_bit,
-                                 out1,out2,out3,out4,
-                                 RegSel1_sig,RegSel2_sig,RegSel3_sig,RegSel4_sig,
-                                 WriteEn1_sig,WriteEn2_sig,
-                                 WriteData1_sig,WriteDest1_sig,
-                                 WriteData2_sig,WriteDest2_sig,
-                                 vl_sig);
+                             PORT MAP(i_clk,newInst,sew_sig,vm_sig,vstart_sig,o_done_1,o_done_2,mask_bit,
+                             out1,out2,out3,out4,
+                             RegSel1_sig,RegSel2_sig,RegSel3_sig,RegSel4_sig,
+                             WriteEn1_sig,WriteEn2_sig,
+                             WriteData1_sig,WriteDest1_sig,
+                             WriteData2_sig,WriteDest2_sig,
+                             vl_sig);
 Cont: Controller GENERIC MAP (XLEN,ELEN,VLEN,SEW_MAX,lgSEW_MAX,VLMAX,logVLMAX)
-                       PORT MAP(i_clk,busy,newInst,vect_inst,
-                       CSR_Addr,CSR_WD,CSR_WEN,CSR_REN,
-                       rs1_data,rs2_data,
-                       rd_data,WriteEn_sig,SrcB,MemWrite,MemRead,WBSrc,CSR_out,
-                       vill,vediv,vlmul,sew_sig,
-                       vstart_sig,vl_sig,
-                       funct6,nf,mop,vm_sig,vs2_rs2_sig,rs1,funct3_width,vd_vs3_sig,mv,extension,addrmode,memwidth,NI_1,NI_2);
+                 PORT MAP(i_clk,busy,newInst,vect_inst,
+                 CSR_Addr,CSR_WD,CSR_WEN,CSR_REN,
+                 rs1_data,rs2_data,
+                 rd_data,WriteEn_sig,SrcB,MemWrite,MemRead,WBSrc,CSR_out,
+                 vill,vediv,vlmul,sew_sig,
+                 vstart_sig,vl_sig,
+                 funct6,nf,mop,vm_sig,vs2_rs2_sig,rs1,funct3_width,vd_vs3_sig,mv,extension,addrmode,memwidth,NI_1,NI_2);
 
 
 

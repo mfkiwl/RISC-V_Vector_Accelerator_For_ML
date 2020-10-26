@@ -35,8 +35,9 @@ entity Control_Unit is
            CSR_out: out STD_LOGIC_VECTOR (XLEN-1 downto 0);
            ---- 1) vtype fields:
            cu_vill: out STD_LOGIC;
-           cu_vediv:out STD_LOGIC_VECTOR (1 downto 0);
-           cu_vlmul: out STD_LOGIC_VECTOR(1 downto 0);  
+           cu_vma:out STD_LOGIC;
+           cu_vta:out STD_LOGIC;
+           cu_vlmul: out STD_LOGIC_VECTOR(2 downto 0);  
            cu_sew: out STD_LOGIC_VECTOR (lgSEW_MAX-1 downto 0); 
            --- 2) vlenb fields:
            --vlenb has no fields; it is a read only register of value VLEN/8
@@ -115,8 +116,9 @@ end minimum;
     -- 3  vl     0xC20
     -- 4  vtype  0xC21
     -- 5  vlenb  0xC22
+    -- 6 vcsr    0x00F
     signal CSR : registers;
-    signal vtype,vlenb,vstart,vl,vxrm,vxsat: STD_LOGIC_VECTOR(XLEN-1 downto 0 );--CSR output signals for readability
+    signal vtype,vlenb,vstart,vl,vxrm,vxsat,vcsr: STD_LOGIC_VECTOR(XLEN-1 downto 0 );--CSR output signals for readability
     
     --newInst logic:
     signal counter: STD_LOGIC:='0'; --Lane1: reset if counter is 0.(might need to flip 0 and 1); Lane2: reset if counter is 1
@@ -132,6 +134,7 @@ begin
     vl<= CSR(3);
     vtype<= CSR(4);
     vlenb<= CSR(5);
+    vcsr<= CSR(6);
     
     cu_vstart <= CSR(0);
     cu_vl <= CSR(3);
@@ -141,11 +144,12 @@ begin
     -- vtype fields:
     cu_vill <= vtype(31);
     --Bits 30 downto 7 are reserved
-    cu_vediv<= vtype( 6 downto 5);
+    cu_vma<= vtype(7);
+    cu_vta<= vtype(6);
     -- SEW Decoding according to Table 3
     -- SEW_MAX the width of the integer in bits
     cu_sew<=  std_logic_vector(to_unsigned(2**(to_integer(unsigned(vtype( 4 downto 2)))+3),lgSEW_MAX));
-    cu_vlmul<= vtype( 1 downto 0);
+    cu_vlmul<= vtype(5) & vtype( 1 downto 0);
     
     
     --Process for CSRs
@@ -164,17 +168,20 @@ begin
                     end if;
                 when x"009" => 
                     if (CSR_WEN='1' and busy='0') then
-                        CSR(1)<=CSR_WD;                      
+                        CSR(1)<=CSR_WD;  
+                        CSR(6)<=CSR(6)(31 downto 1) & CSR_WD(0);  -- mirror vxsat to vcsr                
                     else  if(CSR_REN='1') then CSR_out<=vxsat; end if;
                     end if;
                 when x"00A" =>
                     if (CSR_WEN='1' and busy='0') then
-                        CSR(2)<=CSR_WD;                      
+                        CSR(2)<=CSR_WD;  
+                        CSR(6)<=CSR(6)(31 downto 3) & CSR_WD(1 downto 0) & CSR(6)(0);-- mirror vxrm to vcsr                 
                     else if(CSR_REN='1') then CSR_out<=vxrm; end if;  
                     end if;             
                 when x"C20" => if(CSR_REN='1') then CSR_out<=vl; end if;
                 when x"C21" => if(CSR_REN='1') then CSR_out<=vtype; end if;
                 when x"C22" => if(CSR_REN='1') then CSR_out<=vlenb; end if; 
+                when x"00F" => if(CSR_REN='1') then CSR_out<=vcsr; end if;
                 when others => if(CSR_REN='1') then CSR_out<=(others=>'0'); end if;             
             end case;       
         end if;

@@ -87,37 +87,33 @@ component ALU_with_pipeline is
             );
 end component;
 
-component RegisterFile is
+component RegFile_AddrGen is
     generic (
-           -- Max Vector Length (max number of elements) 
-           VLMAX: integer :=32;
-           -- log(Number of Vector Registers)
-           RegNum: integer:= 5; 
+           NB_LANES: integer:=2; --Number of lanes
+           READ_PORTS_PER_LANE: integer :=2; --Number of read ports per lane
+           VLMAX: integer :=32; -- Max Vector Length (max number of elements) 
+           REG_NUM: integer:= 5; -- log (number of registers)
+           REGS_PER_BANK: integer:= 4; --log(number of registers in each bank) It is REG_NUM-1 in our case since we have 2 banks
            SEW_MAX: integer:=32;
            lgSEW_MAX: integer:=5;
            XLEN:integer:=32; --Register width
            VLEN:integer:=32 --number of bits in register
-           );
-    Port ( clk : in STD_LOGIC;
-           newInst: in STD_LOGIC;
-           out1 : out STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
-           out2 : out STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
-           out3 : out STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
-           out4 : out STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
-           mask_bit: out STD_LOGIC;
-           RegSel1 : in STD_LOGIC_VECTOR (RegNum-1 downto 0);
-           RegSel2 : in STD_LOGIC_VECTOR (RegNum-1 downto 0);
-           RegSel3 : in STD_LOGIC_VECTOR (RegNum-1 downto 0);
-           RegSel4 : in STD_LOGIC_VECTOR (RegNum-1 downto 0);
-           WriteEn1 : in STD_LOGIC;
-           WriteEn2 : in STD_LOGIC;
-           WriteData1 : in STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
-           WriteDest1 : in STD_LOGIC_VECTOR (RegNum-1 downto 0);
-           WriteData2 : in STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
-           WriteDest2 : in STD_LOGIC_VECTOR (RegNum-1 downto 0);
-           sew: in STD_LOGIC_VECTOR (lgSEW_MAX-1 downto 0);
-           vl: in STD_LOGIC_VECTOR(XLEN-1 downto 0);
-           vstart: in STD_LOGIC_VECTOR(XLEN-1 downto 0));
+    );
+    Port (
+            i_clk : in std_logic;
+            newInst: in STD_LOGIC;
+            sew: in std_logic_vector (lgSEW_MAX-1 downto 0);
+            vm: in STD_LOGIC;
+            vstart: in STD_LOGIC_VECTOR(NB_LANES*XLEN-1 downto 0);
+            o_done : out STD_LOGIC_VECTOR(NB_LANES-1 downto 0); 
+            mask_bit: out STD_LOGIC;
+            OutPort: out STD_LOGIC_VECTOR((READ_PORTS_PER_LANE*NB_LANES*SEW_MAX)-1 downto 0);
+            RegSel: in STD_LOGIC_VECTOR((READ_PORTS_PER_LANE*NB_LANES*REGS_PER_BANK)-1 downto 0); 
+            WriteEn : in STD_LOGIC_VECTOR(NB_LANES-1 downto 0);
+            WriteData : in STD_LOGIC_VECTOR (NB_LANES*SEW_MAX-1 downto 0);
+            WriteDest : in STD_LOGIC_VECTOR (NB_LANES*REGS_PER_BANK-1 downto 0);
+            vl: in STD_LOGIC_VECTOR(NB_LANES*XLEN-1 downto 0)
+  );
 end component;
 
 signal     s_op1_1: STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);

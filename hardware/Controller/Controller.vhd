@@ -47,8 +47,9 @@ entity Controller is
     CSR_out: out STD_LOGIC_VECTOR (XLEN-1 downto 0);
     ---- 1) vtype fields:
     vill: out STD_LOGIC;
-    vediv:out STD_LOGIC_VECTOR (1 downto 0);
-    vlmul: out STD_LOGIC_VECTOR(1 downto 0);  
+    vma:out STD_LOGIC;
+    vta:out STD_LOGIC;
+    vlmul: out STD_LOGIC_VECTOR(2 downto 0);  
     sew: out STD_LOGIC_VECTOR (lgSEW_MAX-1 downto 0);
     vstart: out STD_LOGIC_VECTOR(XLEN-1 downto 0);
     vl: out STD_LOGIC_VECTOR(XLEN-1 downto 0);      
@@ -110,8 +111,9 @@ component Control_Unit is
            CSR_out: out STD_LOGIC_VECTOR (XLEN-1 downto 0);
            ---- 1) vtype fields:
            cu_vill: out STD_LOGIC;
-           cu_vediv:out STD_LOGIC_VECTOR (1 downto 0);
-           cu_vlmul: out STD_LOGIC_VECTOR(1 downto 0);  
+           cu_vma:out STD_LOGIC;
+           cu_vta:out STD_LOGIC;
+           cu_vlmul: out STD_LOGIC_VECTOR(2 downto 0);  
            cu_sew: out STD_LOGIC_VECTOR (lgSEW_MAX-1 downto 0); 
            --- 2) vlenb fields:
            --vlenb has no fields; it is a read only register of value VLEN/8
@@ -205,7 +207,7 @@ Dec: Decoder PORT MAP (vect_inst,funct6_sig,bit31_sig,nf,zimm_sig,mop,vm,rs2_sig
 CU:  Control_Unit 
 GENERIC MAP(XLEN,ELEN,VLEN,SEW_MAX,lgSEW_MAX,VLMAX,logVLMAX)
 PORT MAP (clk_in,busy,newInst,CSR_Addr,CSR_WD,CSR_WEN, CSR_REN,
-          CSR_out,vill,vediv,vlmul,sew,vstart,vl,
+          CSR_out,vill,vma,vta,vlmul,sew,vstart,vl,
           funct3_sig,rs1_sig,rs2_sig,rd_sig,opcode_sig,mop_sig,bit31_sig,zimm_sig,rs1_data, rs2_data, rd_data,
           WriteEn,SrcB,MemWrite,MemRead,WBSrc,extension,addrmode,memwidth,
           NI_1, NI_2);

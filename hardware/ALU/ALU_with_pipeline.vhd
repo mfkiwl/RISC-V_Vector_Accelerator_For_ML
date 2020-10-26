@@ -3,6 +3,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 entity ALU_with_pipeline is
     generic(
+           NB_LANES: integer:=2; --Number of lanes            
            VLMAX: integer :=32; -- Max Vector Length (max number of elements) 
            SEW_MAX: integer:=32;
            lgSEW_MAX: integer:=5;
@@ -13,51 +14,34 @@ entity ALU_with_pipeline is
             rst: in STD_LOGIC;
             busy: in STD_LOGIC;
             mask_in: in STD_LOGIC;
-            Xdata_1: in STD_LOGIC_VECTOR(XLEN-1 downto 0); --data from scalar register for Lane 1
-            Xdata_2: in STD_LOGIC_VECTOR(XLEN-1 downto 0); --data from scalar register for Lane 2
-            Vdata1_1: in STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --data coming from vector register to Lane 1
-            Vdata2_1: in STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --data coming from vector register to Lane 1
-            Vdata1_2: in STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --data coming from vector register to Lane 2
-            Vdata2_2: in STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --data coming from vector register to Lane 2
-            Idata_1: in STD_LOGIC_VECTOR(4 downto 0); --data coming from immediate field to Lane 1
-            Idata_2: in STD_LOGIC_VECTOR(4 downto 0); --data coming from immediate field to Lane 2
-            op2_src_1: in STD_LOGIC_VECTOR(1 downto 0); -- selects between scalar/vector reg or immediate from operand 2 for Lane 1
+            Xdata: in STD_LOGIC_VECTOR(NB_LANES*XLEN-1 downto 0); --data from scalar register
+            Vdata: in STD_LOGIC_VECTOR(2*NB_LANES*SEW_MAX-1 downto 0); --data coming from Register File, 2 since we always have 2 operands
+            Idata: in STD_LOGIC_VECTOR(NB_LANES*5-1 downto 0); --data coming from immediate field of size 5 bits
+            op2_src: in STD_LOGIC_VECTOR(2*NB_LANES-1 downto 0); -- selects between scalar/vector reg or immediate from operand 2 
                                                 -- 00 = vector reg
                                                 -- 01 = scalar reg
                                                 -- 10 = immediate
                                                 -- 11 = RESERVED (unbound)
-            op2_src_2: in STD_LOGIC_VECTOR(1 downto 0); -- selects between scalar/vector reg or immediate from operand 2 for Lane 2
-            funct6_1: in STD_LOGIC_VECTOR(5 downto 0); --to know which operation
-            funct6_2: in STD_LOGIC_VECTOR(5 downto 0); --to know which operation
-            funct3_1: in STD_LOGIC_VECTOR (2 downto 0); --to know which operation (Lane 1)
-            funct3_2: in STD_LOGIC_VECTOR (2 downto 0); --to know which operation (Lane 2) 
-            WriteEn_i_1: in STD_LOGIC; --WriteEn for Lane 1 from controller
-            WriteEn_i_2: in STD_LOGIC; --WriteEn for Lane 2 from controller
-            WriteEn_o_1: out STD_LOGIC; --WriteEn for Lane 1 out to Register File
-            WriteEn_o_2: out STD_LOGIC; --WriteEn for Lane 2 out to Register File
-            result_1: out STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --result from Lane 1
-            result_2: out STD_LOGIC_VECTOR(SEW_MAX-1 downto 0) --result from Lane 2
+            funct6: in STD_LOGIC_VECTOR(NB_LANES*6-1 downto 0); --to know which operation
+            funct3: in STD_LOGIC_VECTOR (NB_LANES*3-1 downto 0); --to know which operation
+            WriteEn_i: in STD_LOGIC_VECTOR(NB_LANES-1 downto 0); --WriteEn from controller
+            WriteEn_o: out STD_LOGIC_VECTOR(NB_LANES-1 downto 0); --WriteEn out to Register File
+            result: out STD_LOGIC_VECTOR(NB_LANES*SEW_MAX-1 downto 0) --result vector
             );
 end ALU_with_pipeline;
 
 architecture Behavioral of ALU_with_pipeline is
     
-component ALU_unit is
+component ALU_lane is
     generic (
-           SEW_MAX: integer:=32; --max element width
-           lgSEW_MAX: integer:=5
+           SEW_MAX: integer:=32 --max element width
            );
-    Port (  operand1_1: in STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --Lane 1 op1
-            operand2_1: in STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --Lane 1 op2
-            operand1_2: in STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --Lane 2 op1
-            operand2_2: in STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --Lane 2 op2
-            funct6_1: in STD_LOGIC_VECTOR (5 downto 0); --to know which operation (Lane 1)
-            funct6_2: in STD_LOGIC_VECTOR (5 downto 0); --to know which operation (Lane 2)
-            funct3_1: in STD_LOGIC_VECTOR (2 downto 0); --to know which operation (Lane 1)
-            funct3_2: in STD_LOGIC_VECTOR (2 downto 0); --to know which operation (Lane 2) 
-            result1: out STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --Lane 1 result
-            result2: out STD_LOGIC_VECTOR(SEW_MAX-1 downto 0) --Lane 2 result
-            ); 
+    Port (  operand1: in STD_LOGIC_VECTOR(SEW_MAX-1 downto 0);
+            operand2: in STD_LOGIC_VECTOR(SEW_MAX-1 downto 0);
+            funct6: in STD_LOGIC_VECTOR (5 downto 0); --to know which operation
+            funct3: in STD_LOGIC_VECTOR (2 downto 0);
+            result: out STD_LOGIC_VECTOR(SEW_MAX-1 downto 0) 
+            );
 end component;
 
 component MV_Block is
@@ -71,107 +55,91 @@ component MV_Block is
      );
 end component;
 
-signal s_operand2_1: STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --Lane 1 op2 (output from mux)
-signal s_operand2_2: STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --Lane 2 op2 (output from mux)
+signal s_operand2: STD_LOGIC_VECTOR(NB_LANES*SEW_MAX-1 downto 0); --Op2 vector (output from mux)
 
 --outputs from pipeline register between RegFile and ALU
-signal s_busy: STD_LOGIC;
-signal s_Xdata_1: STD_LOGIC_VECTOR(XLEN-1 downto 0); --data from scalar register for Lane 1
-signal s_Xdata_2: STD_LOGIC_VECTOR(XLEN-1 downto 0); --data from scalar register for Lane 2
-signal s_Vdata1_1: STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --data coming from vector register to Lane 1
-signal s_Vdata2_1: STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --data coming from vector register to Lane 1
-signal s_Vdata1_2: STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --data coming from vector register to Lane 2
-signal s_Vdata2_2: STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --data coming from vector register to Lane 2
-signal s_Idata_1: STD_LOGIC_VECTOR(4 downto 0); --data coming from immediate field to Lane 1
-signal s_Idata_2: STD_LOGIC_VECTOR(4 downto 0); --data coming from immediate field to Lane 2
-signal s_op2_src_1: STD_LOGIC_VECTOR(1 downto 0); -- selects between scalar/vector reg or immediate from operand 2 for Lane 1
-signal s_op2_src_2: STD_LOGIC_VECTOR(1 downto 0); -- selects between scalar/vector reg or immediate from operand 2 for Lane 2
-signal s_funct6_1: STD_LOGIC_VECTOR(5 downto 0); --to know which operation
-signal s_funct6_2: STD_LOGIC_VECTOR(5 downto 0); --to know which operation
-signal s_funct3_1:  STD_LOGIC_VECTOR (2 downto 0); --to know which operation (Lane 1)
-signal s_funct3_2:  STD_LOGIC_VECTOR (2 downto 0); --to know which operation (Lane 2) 
+signal s_busy:  STD_LOGIC;
+signal s_mask_in:  STD_LOGIC;
+signal s_Xdata:  STD_LOGIC_VECTOR(NB_LANES*XLEN-1 downto 0); --data from scalar register
+signal s_Vdata: STD_LOGIC_VECTOR(2*NB_LANES*SEW_MAX-1 downto 0); --data coming from Register File, 2 since we always have 2 operands
+signal s_Idata:  STD_LOGIC_VECTOR(NB_LANES*5-1 downto 0); --data coming from immediate field of size 5 bits
+signal s_op2_src:  STD_LOGIC_VECTOR(2*NB_LANES-1 downto 0); -- selects between scalar/vector reg or immediate from operand 2                                                                                                                           
+signal s_funct6:  STD_LOGIC_VECTOR(NB_LANES*6-1 downto 0); --to know which operation
+signal s_funct3:  STD_LOGIC_VECTOR (NB_LANES*3-1 downto 0); --to know which operation
+signal s_WriteEn_i:  STD_LOGIC_VECTOR(NB_LANES-1 downto 0); --WriteEn from controller
+signal s_WriteEn_o:  STD_LOGIC_VECTOR(NB_LANES-1 downto 0); --WriteEn out to Register File
 
-signal s_WriteEn_i_1: STD_LOGIC; --WriteEn for Lane 1 from controller
-signal s_WriteEn_i_2: STD_LOGIC; --WriteEn for Lane 2 from controller
-signal s_mask_in: STD_LOGIC;
 --output from ALU to pipeline register between ALU and WB stage
-signal s_result_1: STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --result from Lane 1
-signal s_result_2: STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --result from Lane 2
-signal a_result_1: STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --result from ALU Lane 1
-signal a_result_2: STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --result from ALU Lane 2
-signal mv_result_1: STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --result from MV Block 1
-signal mv_result_2: STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --result from MV Block 2   
+signal s_result: STD_LOGIC_VECTOR(NB_LANES*SEW_MAX-1 downto 0); --result vector
+signal a_result: STD_LOGIC_VECTOR(NB_LANES*SEW_MAX-1 downto 0); --result from ALU Lanes
+signal mv_result: STD_LOGIC_VECTOR(NB_LANES*SEW_MAX-1 downto 0); --result from MV Blocks
+  
 begin
 
     pipeline_regs: process(clk, rst) 
     begin
         if(rst='1') then --reset outputs of pipeline registers
             s_busy<= '0';
-            s_Xdata_1<=  (others=>'0');
-            s_Xdata_2<=  (others=>'0');
-            s_Vdata1_1<= (others=>'0');
-            s_Vdata2_1<= (others=>'0');
-            s_Vdata1_2<= (others=>'0');
-            s_Vdata2_2<= (others=>'0');
-            s_Idata_1<=  (others=>'0');
-            s_Idata_2<=  (others=>'0');
-            s_op2_src_1<=(others=>'0');
-            s_op2_src_2<=(others=>'0');
-            s_funct6_1<= (others=>'0');
-            s_funct6_2<= (others=>'0');
-            s_funct3_1<= (others=>'0');
-            s_funct3_2<= (others=>'0');            
-            result_1<= (others=>'0');
-            result_2<= (others=>'0');
-            s_WriteEn_i_1<='0';
-            s_WriteEn_i_2<='0';
-            WriteEn_o_1<='0';
-            WriteEn_o_2<='0';
+            s_Xdata<=  (others=>'0');
+            s_Vdata<= (others=>'0');
+            s_Idata<=  (others=>'0');
+            s_op2_src<=(others=>'0');
+            s_funct6<= (others=>'0');
+            s_funct3<= (others=>'0');    
+            result<= (others=>'0');
+            s_WriteEn_i<=(others=>'0');
+            WriteEn_o<=(others=>'0');
             s_mask_in<='0';
         elsif(rising_edge(clk) and busy= '0' ) then 
-            s_Xdata_1<=  Xdata_1;
-            s_Xdata_2<=  Xdata_2;
-            s_Vdata1_1<= Vdata1_1;
-            s_Vdata2_1<= Vdata2_1;
-            s_Vdata1_2<= Vdata1_2;
-            s_Vdata2_2<= Vdata2_2;
-            s_Idata_1<=  Idata_1; 
-            s_Idata_2<=  Idata_2; 
-            s_op2_src_1<=op2_src_1;
-            s_op2_src_2<=op2_src_2;
-            s_funct6_1<= funct6_1;
-            s_funct6_2<= funct6_2;
-            s_funct3_1<= funct3_1;
-            s_funct3_2<= funct3_2;
-            s_WriteEn_i_1<=WriteEn_i_1;
-            s_WriteEn_i_2<=WriteEn_i_2;
+            s_Xdata<=  Xdata;
+            s_Vdata<= Vdata;
+            s_Idata<=  Idata; 
+            s_op2_src<=op2_src;
+            s_funct6<= funct6;
+            s_funct3<= funct3;
+            s_WriteEn_i<=WriteEn_i;
             s_mask_in<=mask_in;
             --pipeline reg after ALU
-            result_1<= s_result_1;
-            result_2<= s_result_2;
-            WriteEn_o_1<=s_WriteEn_i_1;
-            WriteEn_o_2<=s_WriteEn_i_2;
+            result<= s_result;
+            WriteEn_o<=s_WriteEn_i;
         end if;          
     end process;
     
-    ALU: ALU_unit generic map(SEW_MAX,lgSEW_MAX)
-                  port map(s_Vdata1_1, s_operand2_1, s_Vdata1_2, s_operand2_2,s_funct6_1, s_funct6_2,s_funct3_1,s_funct3_2, a_result_1, a_result_2);
-    MV1: MV_Block generic map(SEW_MAX)
-                  port map(s_Vdata1_1,s_operand2_1,s_mask_in,mv_result_1);
-    MV2: MV_Block generic map(SEW_MAX)
-                  port map(s_Vdata1_2,s_operand2_2,s_mask_in,mv_result_2);
-    with s_op2_src_1 select s_operand2_1 <=
-	Vdata2_1                                             when "00",
-	std_logic_vector(resize(signed(Xdata_1),SEW_MAX))    when "01", --need to sign-extend because XLEN not necessarily = SEW
-	std_logic_vector(resize(signed(Idata_1),SEW_MAX))    when "10", --need to sign-extend because imm is 5 bits
-	(others=>'0')                                        when others;
-	
-	with s_op2_src_2 select s_operand2_2 <=
-	Vdata2_2                                             when "00",
-	std_logic_vector(resize(signed(Xdata_2),SEW_MAX))    when "01", --need to sign-extend because XLEN not necessarily = SEW
-	std_logic_vector(resize(signed(Idata_2),SEW_MAX))    when "10", --need to sign-extend because imm is 5 bits
-	(others=>'0')                                        when others;
+   -- ALU: ALU_unit generic map(SEW_MAX,lgSEW_MAX)
+    --              port map(s_Vdata1_1, s_operand2_1, s_Vdata1_2, s_operand2_2,s_funct6_1, s_funct6_2,s_funct3_1,s_funct3_2, a_result_1, a_result_2);
+    LANES_GEN:for i in 0 to NB_LANES-1 generate   
+    ALU: ALU_lane generic map(SEW_MAX)
+                  port map(s_Vdata((2*i+1)*SEW_MAX-1 downto 2*i*SEW_MAX), -- RegFile output is of the form [...Op2,Op1]
+                  s_operand2((i+1)*SEW_MAX-1 downto i*SEW_MAX),
+                  s_funct6((i+1)*6-1 downto i*6),
+                  s_funct3((i+1)*3-1 downto i*3),
+                  a_result((i+1)*SEW_MAX-1 downto i*SEW_MAX)
+                  );
+    MV: MV_Block  generic map(SEW_MAX)
+                  port map(s_Vdata((2*i+1)*SEW_MAX-1 downto 2*i*SEW_MAX), -- RegFile output is of the form [...Op2,Op1]
+                  s_operand2((i+1)*SEW_MAX-1 downto i*SEW_MAX),
+                  s_mask_in,
+                  mv_result((i+1)*SEW_MAX-1 downto i*SEW_MAX)
+                  );
 
-    s_result_1 <= mv_result_1 when s_funct6_1="010111" else a_result_1;
-    s_result_2 <= mv_result_2 when s_funct6_2="010111" else a_result_2;                 
+    end generate LANES_GEN;
+    op2_mux:process(s_op2_src,Vdata,Xdata,Idata,s_funct6,a_result,mv_result) -- process to select operand2 based on s_op2_src
+    begin 
+       for i in 0 to NB_LANES-1 loop
+            if (s_op2_src(2*i+1 downto 2*i)="00") then
+                s_operand2((i+1)*SEW_MAX-1 downto i*SEW_MAX)<=Vdata((2*i+2)*SEW_MAX-1 downto (2*i+1)*SEW_MAX);
+            elsif (s_op2_src(2*i+1 downto 2*i)="01") then
+                s_operand2((i+1)*SEW_MAX-1 downto i*SEW_MAX)<=std_logic_vector(resize(signed(Xdata((i+1)*XLEN-1 downto i*XLEN)),SEW_MAX));--need to sign-extend because XLEN not necessarily = SEW
+            elsif (s_op2_src(2*i+1 downto 2*i)="10") then
+                s_operand2((i+1)*SEW_MAX-1 downto i*SEW_MAX)<= std_logic_vector(resize(signed(Idata((i+1)*5-1 downto i*5)),SEW_MAX));--need to sign-extend because imm is 5 bits
+            else 
+                s_operand2((i+1)*SEW_MAX-1 downto i*SEW_MAX)<=(others=>'0');
+            end if;
+            if (s_funct6((i+1)*6-1 downto i*6)="010111") then  
+                s_result((i+1)*SEW_MAX-1 downto i*SEW_MAX)<=mv_result((i+1)*SEW_MAX-1 downto i*SEW_MAX);
+            else
+                s_result((i+1)*SEW_MAX-1 downto i*SEW_MAX)<=a_result((i+1)*SEW_MAX-1 downto i*SEW_MAX);    
+            end if;        
+        end loop;
+   end process;               
 end Behavioral;

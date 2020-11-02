@@ -3,10 +3,13 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 entity RegFile_ALU is
     generic (
+           READ_PORTS_PER_LANE: integer :=2; --Number of read ports per lane
+           REG_NUM: integer:= 5; -- log (number of registers)
+           REGS_PER_BANK: integer:= 4; --log(number of registers in each bank) It is REG_NUM-1 in our case since we have 2 banks          
+           NB_LANES:integer :=2;
            -- Max Vector Length (max number of elements) 
            VLMAX: integer :=32;
            -- log(Number of Vector Registers)
-           RegNum: integer:= 5; 
            SEW_MAX: integer:=32;
            lgSEW_MAX: integer:=5;
            XLEN:integer:=32; --Register width
@@ -15,34 +18,26 @@ entity RegFile_ALU is
     Port(   clk: in STD_LOGIC; 
             rst: in STD_LOGIC;
             busy: in STD_LOGIC;
-            Xdata_1: in STD_LOGIC_VECTOR(XLEN-1 downto 0); --data from scalar register for Lane 1
-            Xdata_2: in STD_LOGIC_VECTOR(XLEN-1 downto 0); --data from scalar register for Lane 2
-            Idata_1: in STD_LOGIC_VECTOR(4 downto 0); --data coming from immediate field to Lane 1
-            Idata_2: in STD_LOGIC_VECTOR(4 downto 0); --data coming from immediate field to Lane 2
-            op2_src_1: in STD_LOGIC_VECTOR(1 downto 0); -- selects between scalar/vector reg or immediate from operand 2 for Lane 1
+            Xdata: in STD_LOGIC_VECTOR(NB_LANES*XLEN-1 downto 0); --data from scalar register
+            Idata: in STD_LOGIC_VECTOR(NB_LANES*5-1 downto 0); --data coming from immediate field of size 5 bits
+            op2_src: in STD_LOGIC_VECTOR(2*NB_LANES-1 downto 0); -- selects between scalar/vector reg or immediate from operand 2 
                                                 -- 00 = vector reg
                                                 -- 01 = scalar reg
                                                 -- 10 = immediate
                                                 -- 11 = RESERVED (unbound)
-            op2_src_2: in STD_LOGIC_VECTOR(1 downto 0); -- selects between scalar/vector reg or immediate from operand 2 for Lane 2
-            funct6_1: in STD_LOGIC_VECTOR(5 downto 0); --to know which operation
-            funct6_2: in STD_LOGIC_VECTOR(5 downto 0); --to know which operation
-            funct3_1: in STD_LOGIC_VECTOR(2 downto 0); --to know which operation
-            funct3_2: in STD_LOGIC_VECTOR(2 downto 0); --to know which operation
-            WriteEn_i_1: in STD_LOGIC; --WriteEn for Lane 1 from controller
-            WriteEn_i_2: in STD_LOGIC; --WriteEn for Lane 2 from controller
-            ------Register File
+            funct6: in STD_LOGIC_VECTOR(NB_LANES*6-1 downto 0); --to know which operation
+            funct3: in STD_LOGIC_VECTOR (NB_LANES*3-1 downto 0); --to know which operation
+            WriteEn_i: in STD_LOGIC_VECTOR(NB_LANES-1 downto 0); --WriteEn from controller
+            ------Register File            
             sew: in STD_LOGIC_VECTOR (lgSEW_MAX-1 downto 0);
-            vl: in STD_LOGIC_VECTOR(XLEN-1 downto 0);
-            vstart: in STD_LOGIC_VECTOR(XLEN-1 downto 0);
+            vm: in STD_LOGIC;            
+            vl: in STD_LOGIC_VECTOR(NB_LANES*XLEN-1 downto 0);
+            vstart: in STD_LOGIC_VECTOR(NB_LANES*XLEN-1 downto 0);
             newInst: in STD_LOGIC;
-            RegSel1 : in STD_LOGIC_VECTOR (RegNum-1 downto 0);
-            RegSel2 : in STD_LOGIC_VECTOR (RegNum-1 downto 0);
-            RegSel3 : in STD_LOGIC_VECTOR (RegNum-1 downto 0);
-            RegSel4 : in STD_LOGIC_VECTOR (RegNum-1 downto 0);
-            WriteDest1 : in STD_LOGIC_VECTOR (RegNum-1 downto 0);
-            WriteDest2 : in STD_LOGIC_VECTOR (RegNum-1 downto 0);
-            ld_RF: in STD_LOGIC --mux select to fill RF
+            RegSel: in STD_LOGIC_VECTOR((READ_PORTS_PER_LANE*NB_LANES*REGS_PER_BANK)-1 downto 0); 
+            WriteDest : in STD_LOGIC_VECTOR (NB_LANES*REGS_PER_BANK-1 downto 0);
+--            ld_RF: in STD_LOGIC; --mux select to fill RF
+            o_done : out STD_LOGIC_VECTOR(NB_LANES-1 downto 0) 
 );
 end RegFile_ALU;
 
@@ -50,6 +45,7 @@ architecture Structural of RegFile_ALU is
 
 component ALU_with_pipeline is
     generic(
+           NB_LANES: integer:=2; --Number of lanes            
            VLMAX: integer :=32; -- Max Vector Length (max number of elements) 
            SEW_MAX: integer:=32;
            lgSEW_MAX: integer:=5;
@@ -60,30 +56,19 @@ component ALU_with_pipeline is
             rst: in STD_LOGIC;
             busy: in STD_LOGIC;
             mask_in: in STD_LOGIC;
-            Xdata_1: in STD_LOGIC_VECTOR(XLEN-1 downto 0); --data from scalar register for Lane 1
-            Xdata_2: in STD_LOGIC_VECTOR(XLEN-1 downto 0); --data from scalar register for Lane 2
-            Vdata1_1: in STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --data coming from vector register to Lane 1
-            Vdata2_1: in STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --data coming from vector register to Lane 1
-            Vdata1_2: in STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --data coming from vector register to Lane 2
-            Vdata2_2: in STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --data coming from vector register to Lane 2
-            Idata_1: in STD_LOGIC_VECTOR(4 downto 0); --data coming from immediate field to Lane 1
-            Idata_2: in STD_LOGIC_VECTOR(4 downto 0); --data coming from immediate field to Lane 2
-            op2_src_1: in STD_LOGIC_VECTOR(1 downto 0); -- selects between scalar/vector reg or immediate from operand 2 for Lane 1
+            Xdata: in STD_LOGIC_VECTOR(NB_LANES*XLEN-1 downto 0); --data from scalar register
+            Vdata: in STD_LOGIC_VECTOR(2*NB_LANES*SEW_MAX-1 downto 0); --data coming from Register File, 2 since we always have 2 operands
+            Idata: in STD_LOGIC_VECTOR(NB_LANES*5-1 downto 0); --data coming from immediate field of size 5 bits
+            op2_src: in STD_LOGIC_VECTOR(2*NB_LANES-1 downto 0); -- selects between scalar/vector reg or immediate from operand 2 
                                                 -- 00 = vector reg
                                                 -- 01 = scalar reg
                                                 -- 10 = immediate
                                                 -- 11 = RESERVED (unbound)
-            op2_src_2: in STD_LOGIC_VECTOR(1 downto 0); -- selects between scalar/vector reg or immediate from operand 2 for Lane 2
-            funct6_1: in STD_LOGIC_VECTOR(5 downto 0); --to know which operation
-            funct6_2: in STD_LOGIC_VECTOR(5 downto 0); --to know which operation
-            funct3_1: in STD_LOGIC_VECTOR (2 downto 0); --to know which operation (Lane 1)
-            funct3_2: in STD_LOGIC_VECTOR (2 downto 0); --to know which operation (Lane 2) 
-            WriteEn_i_1: in STD_LOGIC; --WriteEn for Lane 1 from controller
-            WriteEn_i_2: in STD_LOGIC; --WriteEn for Lane 2 from controller
-            WriteEn_o_1: out STD_LOGIC; --WriteEn for Lane 1 out to Register File
-            WriteEn_o_2: out STD_LOGIC; --WriteEn for Lane 2 out to Register File
-            result_1: out STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --result from Lane 1
-            result_2: out STD_LOGIC_VECTOR(SEW_MAX-1 downto 0) --result from Lane 2
+            funct6: in STD_LOGIC_VECTOR(NB_LANES*6-1 downto 0); --to know which operation
+            funct3: in STD_LOGIC_VECTOR (NB_LANES*3-1 downto 0); --to know which operation
+            WriteEn_i: in STD_LOGIC_VECTOR(NB_LANES-1 downto 0); --WriteEn from controller
+            WriteEn_o: out STD_LOGIC_VECTOR(NB_LANES-1 downto 0); --WriteEn out to Register File
+            result: out STD_LOGIC_VECTOR(NB_LANES*SEW_MAX-1 downto 0) --result vector
             );
 end component;
 
@@ -116,31 +101,46 @@ component RegFile_AddrGen is
   );
 end component;
 
-signal     s_op1_1: STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
-signal     s_op2_1: STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
-signal     s_op1_2: STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
-signal     s_op2_2: STD_LOGIC_VECTOR(SEW_MAX-1 downto 0);
-signal     s_result_1: STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --ALU lane 1 output 
-signal     s_result_2: STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --ALU lane 2 output
-signal     s_WriteEn_1: STD_LOGIC; 
-signal     s_WriteEn_2: STD_LOGIC;
+signal     s_OutPort: STD_LOGIC_VECTOR((READ_PORTS_PER_LANE*NB_LANES*SEW_MAX)-1 downto 0);
+signal     s_WriteEn_o: STD_LOGIC_VECTOR(NB_LANES-1 downto 0);
+signal     s_result: STD_LOGIC_VECTOR(NB_LANES*SEW_MAX-1 downto 0);
 signal     s_mask_bit: STD_LOGIC;
-signal     RF_wd_mux_1: STD_LOGIC_VECTOR(SEW_MAX-1 downto 0);
-signal     RF_wd_mux_2: STD_LOGIC_VECTOR(SEW_MAX-1 downto 0);
+--signal     RF_wd_mux_1: STD_LOGIC_VECTOR(SEW_MAX-1 downto 0);
+--signal     RF_wd_mux_2: STD_LOGIC_VECTOR(SEW_MAX-1 downto 0);
 
 begin
 
 
-RF: RegisterFile GENERIC MAP(VLMAX,RegNum,SEW_MAX,lgSEW_MAX,XLEN,VLEN)
-    PORT MAP(clk,newInst,s_op1_1,s_op2_1,s_op1_2,s_op2_2,s_mask_bit,RegSel1,RegSel2,RegSel3,RegSel4,s_WriteEn_1,s_WriteEn_2,RF_wd_mux_1,WriteDest1,RF_wd_mux_2,WriteDest2,sew,vl,vstart);
+RF: RegFile_AddrGen GENERIC MAP(NB_LANES,
+           READ_PORTS_PER_LANE,
+           VLMAX,
+           REG_NUM,
+           REGS_PER_BANK,
+           SEW_MAX,
+           lgSEW_MAX,
+           XLEN,
+           VLEN)
+           PORT MAP(clk,
+           newInst,
+           sew,
+           vm,
+           vstart,
+           o_done,
+           s_mask_bit,
+           s_OutPort,
+           RegSel,
+           s_WriteEn_o,
+           s_result,
+           WriteDest,
+           vl);
     
-ALU: ALU_with_pipeline generic map(VLMAX, SEW_MAX, lgSEW_MAX, XLEN, VLEN)
+ALU: ALU_with_pipeline generic map(NB_LANES,VLMAX, SEW_MAX, lgSEW_MAX, XLEN, VLEN)
                            port map(clk,rst,busy,s_mask_bit,
-                                    Xdata_1,Xdata_2,s_op1_1,s_op2_1,s_op1_2,s_op2_2,Idata_1,Idata_2,
-                                    op2_src_1,op2_src_2,funct6_1,funct6_2,funct3_1,funct3_2,WriteEn_i_1,WriteEn_i_2,s_WriteEn_1,s_WriteEn_2,s_result_1, s_result_2);
+                                    Xdata,s_OutPort,Idata,
+                                    op2_src,funct6,funct3,WriteEn_i,s_WriteEn_o,s_result);
 
-RF_wd_mux_1<= s_result_1 when ld_RF='0' else Xdata_1;
-RF_wd_mux_2<= s_result_2 when ld_RF='0' else Xdata_2;
+--RF_wd_mux_1<= s_result_1 when ld_RF='0' else Xdata_1;
+--RF_wd_mux_2<= s_result_2 when ld_RF='0' else Xdata_2;
 
 
  

@@ -60,6 +60,10 @@ signal    WriteData : STD_LOGIC_VECTOR (NB_LANES*SEW_MAX-1 downto 0);
 signal    WriteDest : STD_LOGIC_VECTOR (NB_LANES*REGS_PER_BANK-1 downto 0);
 signal    vl: STD_LOGIC_VECTOR(NB_LANES*XLEN-1 downto 0);
 
+signal    s_WriteEn : STD_LOGIC_VECTOR(NB_LANES-1 downto 0);
+signal    s_WriteData : STD_LOGIC_VECTOR (NB_LANES*SEW_MAX-1 downto 0);
+signal    s_WriteDest : STD_LOGIC_VECTOR (NB_LANES*REGS_PER_BANK-1 downto 0);
+
 begin
 
 UUT: RegFile_AddrGen GENERIC MAP(NB_LANES,READ_PORTS_PER_LANE,VLMAX,REG_NUM,REGS_PER_BANK,SEW_MAX,lgSEW_MAX,XLEN,VLEN)
@@ -67,9 +71,9 @@ UUT: RegFile_AddrGen GENERIC MAP(NB_LANES,READ_PORTS_PER_LANE,VLMAX,REG_NUM,REGS
                       o_done,mask_bit,
                       OutPort,
                       RegSel,
-                      WriteEn,
-                      WriteData,
-                      WriteDest,
+                      s_WriteEn,
+                      s_WriteData,
+                      s_WriteDest,
                       vl
                       );
     clk_proc: process begin
@@ -80,18 +84,61 @@ UUT: RegFile_AddrGen GENERIC MAP(NB_LANES,READ_PORTS_PER_LANE,VLMAX,REG_NUM,REGS
     end process; 
     
     process begin
+        WriteData<= x"0000000000000000";
+        WriteEn<="00";
+        WriteDest<="00000000";       
         vm<='1';
         newInst<='0'; sew <= "01000"; vl <= x"0000000400000004"; vstart <= x"0000000000000000"; 
-        WriteEn<="11"; WriteData<= x"0000000800000004"; WriteDest<="00000000";
         RegSel<="0001000000010000";
-        wait for 10ns; newInst<='1'; wait for 5ns; newInst<= '0'; wait for 5ns;
-        WriteData<= x"0000000900000005"; wait for 10ns;
-        WriteData<= x"0000000A00000006"; wait for 10ns;
-        WriteData<= x"0000000B00000007"; wait for 30ns;
+        wait for 5ns; newInst<='1'; wait for 2ns; 
+        WriteData<= x"0000000800000004";
+        WriteEn<="11";
+        WriteDest<="00010001";
+        newInst<= '0'; wait for 8ns;
+        wait for 2ns;
+        --WriteEn<="00";
+        wait for 2ns;WriteData<= x"0000000900000005"; wait for 8ns;
+        wait for 2ns;WriteData<= x"0000000A00000006"; wait for 8ns;
+        wait for 2ns;WriteData<= x"0000000B00000007"; wait for 28ns;
         WriteEn<= "00"; 
-        newInst<='1'; wait for 5ns; newInst<= '0'; wait for 5ns;
+        newInst<='1'; wait for 2ns; newInst<= '0'; wait for 5ns;
         wait;
     
-    end process;                      
+    end process; 
 
+--    process begin
+--        WriteData<= x"0000000000000000";
+--        WriteEn<="00";
+--        WriteDest<="00000000"; 
+--        vm<='1';
+--        newInst<='0'; sew <= "01000"; vl <= x"0000000400000004"; vstart <= x"0000000000000000"; 
+--        RegSel<="0001000000010000";
+--        wait for 5ns; 
+--        newInst<='1'; wait for 2ns; 
+--        newInst<= '0'; wait for 8ns;
+--        WriteData<= x"0000000800000004";
+--        WriteEn<="11";
+--        WriteDest<="00000000";
+--        wait for 10ns;
+--        WriteData<= x"0000000900000005"; wait for 10ns;
+--        WriteData<= x"0000000A00000006"; wait for 10ns;
+--        WriteData<= x"0000000B00000007"; wait for 30ns;
+--        WriteEn<= "00"; 
+--        newInst<='1'; wait for 2ns; newInst<= '0'; wait for 5ns;
+--        wait;
+    
+--    end process;    
+                         
+    pipeline:process(i_clk,WriteData,WriteEn,WriteDest,s_WriteEn,s_WriteData,s_WriteDest) 
+    begin
+        if rising_edge(i_clk) then
+            s_WriteData<= WriteData;
+            s_WriteEn<=WriteEn;
+            s_WriteDest<=WriteDest; 
+        else
+            s_WriteEn<=s_WriteEn;   
+            s_WriteData<= s_WriteData;
+            s_WriteDest<=s_WriteDest;      
+        end if;
+    end process;
 end Behavioral;

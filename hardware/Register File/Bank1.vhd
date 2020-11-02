@@ -48,34 +48,26 @@ begin
     vl_int<= to_integer(unsigned(vl)); --convert vl to integer
     offset_int<= to_integer(unsigned(offset));
     p1: process(clk, newInst, RegSel1, RegSel2, WriteDest, WriteData, WriteEn, registers) is
-        --variable read_counter: integer range 0 to (VLEN-1); -- first bit to read from
         variable write_counter: integer range 0 to (VLEN-1); -- first bit to write to
-        --variable elements_read: integer range 0 to (VLMAX-1); -- # of elements read so far
-        --variable elements_written: integer range 0 to (VLMAX-1); -- # of elements written so far
     begin
-        if(newInst = '1') then 
-       --elements_read:=to_integer(unsigned(vstart)); 
-       -- elements_written:=to_integer(unsigned(vstart)); 
-       -- read_counter:=to_integer(unsigned(vstart))*sew_int; 
-        write_counter:=to_integer(unsigned(vstart))*sew_int; 
-        end if; --new instruction from dispatcher, reset counters
-
-        if falling_edge(clk) then                                 
+        if rising_edge(clk) then   
+            if(newInst = '1') then 
+                write_counter:=to_integer(unsigned(vstart))*sew_int; 
+            else
+                write_counter:=write_counter;
+            end if; --new instruction from dispatcher, reset counters                                           
             if WriteEn = '1' then
                 --Write 
                 if(write_counter/sew_int < vl_int) then
-                    registers(to_integer(unsigned(WriteDest)))((offset_int+sew_int-1) downto offset_int)<=WriteData(sew_int-1 downto 0);  
+                    registers(to_integer(unsigned(WriteDest)))((write_counter+sew_int-1) downto write_counter)<=WriteData(sew_int-1 downto 0);  
                     write_counter:= write_counter+sew_int;
-                    --elements_written:= elements_written+1;
                 end if;
             end if;
-        elsif rising_edge(clk) then
+        elsif falling_edge(clk) then
             if(offset_int/sew_int < vl_int) then
                 mask_bit<=registers(0)(offset_int);
                 out1<= std_logic_vector(resize( signed((registers(to_integer(unsigned(RegSel1))) ((offset_int+sew_int-1) downto offset_int)) ), out1'length));
                 out2<= std_logic_vector(resize( signed((registers(to_integer(unsigned(RegSel2))) ((offset_int+sew_int-1) downto offset_int)) ), out2'length));
-               -- read_counter:= read_counter+sew_int;
-               --elements_read:= elements_read+1;
             end if;
         end if;
     end process;

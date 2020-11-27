@@ -6,6 +6,7 @@ entity OffsetGen is
   generic (
     VLEN: natural range 32 to 8192 := 32; -- vector register length in bits; must be a power of two.
     lgVLEN : natural range 5 to 13 := 5; -- log2(VLEN)
+    SLEN: natural range 32 to 8192:= 32; --striping distance
     XLEN: natural range 8 to 64 := 32 -- scalar register length in bits
   );
   port (
@@ -114,15 +115,21 @@ begin
              VLEN/SEW when others;
 
   -- Set MLEN
-  with i_vlmul select
-    MLEN <= SEW when "000", -- LMUL = 1
-            SEW/2 when "001", -- LMUL = 2
-            SEW/4 when "010", -- LMUL = 4
-            SEW/8 when "011", -- LMUL = 8
-            SEW*8 when "101", -- LMUL = 1/8
-            SEW*4 when "110", -- LMUL = 1/4
-            SEW*2 when "111", -- LMUL = 1/2
-            SEW when others;
-
-
+  process(i_vlmul) begin
+    if (SLEN< VLEN) then --TODO: double check this case
+        case(i_vlmul) is
+            when "000"=> MLEN<= SEW; -- LMUL = 1  
+            when "001"=> MLEN<= SEW/2; -- LMUL = 2  
+            when "010"=> MLEN<= SEW/4; -- LMUL = 4  
+            when "011"=> MLEN<= SEW/8; -- LMUL = 8  
+            when "101"=> MLEN<= SEW*8; -- LMUL = 1/8
+            when "110"=> MLEN<= SEW*4; -- LMUL = 1/4
+            when "111"=> MLEN<= SEW*2; -- LMUL = 1/2
+            when others=>MLEN<= 1;
+        end case;
+     else
+        MLEN<=1;
+    end if;
+  end process;
+    
 end Behavioral;

@@ -1,4 +1,4 @@
-# RISCV_Vector_Unit
+# A Configurable RISC-V Vector Accelerator for Machine Lespearning
 
 RISC-V implementation of a vector unit that will eventually be used to accelerate Machine Learning algorithms.
 
@@ -8,12 +8,13 @@ RISC-V implementation of a vector unit that will eventually be used to accelerat
 1. Controller
    - Decoder: decodes vector instruction into fields
    - Control Unit: outputs control signals to ALU, MEM units based on opcode,funct3 fields
-   - Dispatcher: manages busy signals coming from ALU, MEM units
+   - Lane Specifier: logic that dispatches instructions to appropriate vector lanes. Currently, the lane is specified based on the MSB of the destination register, since our banks are split in half.
    
 2. Register File
-   - 2 Banks: 2 read + 1 write ports each
+   - Offset Generator: generates correct read and write element offsets within a vector register.
+   - 2 Banks of 16 registers each: split into upper and lower for simplicity. 2 read + 1 write ports each
    
 3. ALU Unit
    - 2 Lanes
-   - Supports chaining
+   - Will support chaining.
    

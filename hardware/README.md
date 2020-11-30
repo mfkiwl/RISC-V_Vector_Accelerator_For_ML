@@ -1,6 +1,7 @@
-# A Configurable RISC-V Vector Accelerator for Machine Lespearning
+# A Configurable RISC-V Vector Accelerator for Machine Learning
 
 RISC-V implementation of a vector unit that will eventually be used to accelerate Machine Learning algorithms.
+We plan on supporting special types such as bfloat16 and posits to accelerate these workloads.
 
 --------------------------------------------------------------------
                                     SPECIFICATIONS      

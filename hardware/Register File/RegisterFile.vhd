@@ -5,26 +5,28 @@ entity RegisterFile is
     generic (
            NB_LANES: integer:=2; --Number of lanes
            READ_PORTS_PER_LANE: integer :=2; --Number of read ports per lane
-           VLMAX: integer :=32; -- Max Vector Length (max number of elements) 
            REG_NUM: integer:= 5; -- log (number of registers)
            REGS_PER_BANK: integer:= 4; --log(number of registers in each bank) It is REG_NUM-1 in our case since we have 2 banks
-           SEW_MAX: integer:=32;
-           lgSEW_MAX: integer:=5;
+           ELEN: integer:=1024;
+           lgELEN: integer:=10;
            XLEN:integer:=32; --Register width
-           VLEN:integer:=32 --number of bits in register
+           VLEN:integer:=1024; --number of bits in register
+           lgVLEN:integer:=5
            );
     Port ( clk : in STD_LOGIC;
-           newInst: in STD_LOGIC;
+           newInst: in STD_LOGIC_VECTOR(NB_LANES-1 downto 0);
            mask_bit: out STD_LOGIC;
-           OutPort: out STD_LOGIC_VECTOR((READ_PORTS_PER_LANE*NB_LANES*SEW_MAX)-1 downto 0);
+           OutPort: out STD_LOGIC_VECTOR((READ_PORTS_PER_LANE*NB_LANES*ELEN)-1 downto 0);
            RegSel: in STD_LOGIC_VECTOR((READ_PORTS_PER_LANE*NB_LANES*REGS_PER_BANK)-1 downto 0); 
            WriteEn : in STD_LOGIC_VECTOR(NB_LANES-1 downto 0);
-           WriteData : in STD_LOGIC_VECTOR (NB_LANES*SEW_MAX-1 downto 0);
+           WriteData : in STD_LOGIC_VECTOR (NB_LANES*ELEN-1 downto 0);
            WriteDest : in STD_LOGIC_VECTOR (NB_LANES*REGS_PER_BANK-1 downto 0);
-           sew: in STD_LOGIC_VECTOR (lgSEW_MAX-1 downto 0);
+           sew: in STD_LOGIC_VECTOR (3*NB_LANES-1 downto 0);
+           vlmul: in STD_LOGIC_VECTOR(3*NB_LANES-1 downto 0);
            vl: in STD_LOGIC_VECTOR(NB_LANES*XLEN-1 downto 0);
-           vstart: in STD_LOGIC_VECTOR(NB_LANES*XLEN-1 downto 0);
-           reg_offset : in STD_LOGIC_VECTOR(NB_LANES*lgSEW_MAX-1 downto 0);  
+           vstart: in STD_LOGIC_VECTOR(NB_LANES*lgVLEN-1 downto 0);
+           r_offset : in STD_LOGIC_VECTOR(NB_LANES*lgVLEN-1 downto 0); 
+           w_offset : in STD_LOGIC_VECTOR(NB_LANES*lgVLEN-1 downto 0); 
            mask_reg: out STD_LOGIC_VECTOR(VLEN-1 downto 0)                        
            );
 end RegisterFile;
@@ -33,59 +35,60 @@ architecture RegFile_arch of RegisterFile is
     
     component Bank1 is
     generic (
-           -- Max Vector Length
-           VLMAX: integer :=32;
            -- log(Number of Vector Registers)
            RegNum: integer:= 5; 
-           SEW_MAX: integer:=32;
-           lgSEW_MAX: integer:=5;
+           ELEN: integer:=1024;
+           lgELEN: integer:=10;
            XLEN:integer:=32; --Register width
-           VLEN:integer:=32
+           VLEN:integer:=1024;
+           lgVLEN:integer:=5
            );
     Port ( clk : in STD_LOGIC;
            newInst: in STD_LOGIC;
-           out1 : out STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
-           out2 : out STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
+           out1 : out STD_LOGIC_VECTOR (ELEN-1 downto 0);
+           out2 : out STD_LOGIC_VECTOR (ELEN-1 downto 0);
            mask_bit: out STD_LOGIC;
            RegSel1 : in STD_LOGIC_VECTOR (RegNum-2 downto 0);
            RegSel2 : in STD_LOGIC_VECTOR (RegNum-2 downto 0);
            WriteEn : in STD_LOGIC;
-           WriteData : in STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
+           WriteData : in STD_LOGIC_VECTOR (ELEN-1 downto 0);
            WriteDest : in STD_LOGIC_VECTOR (RegNum-2 downto 0);
-           sew: in STD_LOGIC_VECTOR (lgSEW_MAX-1 downto 0);
+           sew: in STD_LOGIC_VECTOR (2 downto 0);
+           vlmul: in STD_LOGIC_VECTOR(2 downto 0);
            vl: in STD_LOGIC_VECTOR(XLEN-1 downto 0);
-           vstart: in STD_LOGIC_VECTOR(XLEN-1 downto 0);
+           vstart: in STD_LOGIC_VECTOR(lgVLEN-1 downto 0);
            mask_reg: out STD_LOGIC_VECTOR(VLEN-1 downto 0);
-           offset : in STD_LOGIC_VECTOR(lgSEW_MAX-1 downto 0)
+           r_offset : in STD_LOGIC_VECTOR(lgVLEN-1 downto 0);
+           w_offset : in STD_LOGIC_VECTOR(lgVLEN-1 downto 0)
            );
 end component;
 
 component Bank is
 
     generic (
-           -- Max Vector Length (max number of elements) 
-           VLMAX: integer :=32;
            -- log(Number of Vector Registers)
            RegNum: integer:= 5; 
-           SEW_MAX: integer:=32;
-           lgSEW_MAX: integer:=5;
+           ELEN: integer:=1024;
+           lgELEN: integer:=10;
            XLEN:integer:=32; --Register width
-           VLEN:integer:=32 --number of bits in register
-    
+           VLEN:integer:=1024; --number of bits in register
+           lgVLEN:integer:=5
              );
     Port ( clk : in STD_LOGIC;
            newInst: in STD_LOGIC;
-           out1 : out STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
-           out2 : out STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
+           out1 : out STD_LOGIC_VECTOR (ELEN-1 downto 0);
+           out2 : out STD_LOGIC_VECTOR (ELEN-1 downto 0);
            RegSel1 : in STD_LOGIC_VECTOR (RegNum-2 downto 0);
            RegSel2 : in STD_LOGIC_VECTOR (RegNum-2 downto 0);
            WriteEn : in STD_LOGIC;
-           WriteData : in STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
+           WriteData : in STD_LOGIC_VECTOR (ELEN-1 downto 0);
            WriteDest : in STD_LOGIC_VECTOR (RegNum-2 downto 0);
-           sew: in STD_LOGIC_VECTOR (lgSEW_MAX-1 downto 0);
+           sew: in STD_LOGIC_VECTOR (2 downto 0);
+           vlmul: in STD_LOGIC_VECTOR(2 downto 0);
            vl: in STD_LOGIC_VECTOR(XLEN-1 downto 0);
-           vstart: in STD_LOGIC_VECTOR(XLEN-1 downto 0);
-           offset : in STD_LOGIC_VECTOR(lgSEW_MAX-1 downto 0)          
+           vstart: in STD_LOGIC_VECTOR(lgVLEN-1 downto 0);
+           r_offset : in STD_LOGIC_VECTOR(lgVLEN-1 downto 0);
+           w_offset : in STD_LOGIC_VECTOR(lgVLEN-1 downto 0)        
            );
 end component;   
     --Bank A used for registers 16 to 31 and Bank B used for registers 0 to 15
@@ -94,26 +97,36 @@ end component;
     --constant RSB1: integer := 1; constant RSB2: integer := 0;
     --constant WDA: integer:=1; constant WDB: integer:=0;
 begin
-     BankA: Bank1 GENERIC MAP(VLMAX, REG_NUM, SEW_MAX, lgSEW_MAX, XLEN, VLEN)
-                  PORT MAP(clk, newInst, OutPort(SEW_MAX-1 downto 0 ), OutPort(2*SEW_MAX-1 downto SEW_MAX),
+     BankA: Bank1 GENERIC MAP(REG_NUM, ELEN, lgELEN, XLEN, VLEN,lgVLEN)
+                  PORT MAP(clk, newInst(0), OutPort(ELEN-1 downto 0 ), OutPort(2*ELEN-1 downto ELEN),
                   mask_bit, RegSel(REGS_PER_BANK-1 downto 0),RegSel(2*REGS_PER_BANK-1 downto REGS_PER_BANK), WriteEn(0), 
-                  WriteData(SEW_MAX-1 downto 0), WriteDest(REGS_PER_BANK-1 downto 0), 
-                  sew, vl(XLEN-1 downto 0), vstart(XLEN-1 downto 0),mask_reg,reg_offset(lgSEW_MAX-1 downto 0));  
+                  WriteData(ELEN-1 downto 0), WriteDest(REGS_PER_BANK-1 downto 0), 
+                  sew(2 downto 0), 
+                  vlmul(2 downto 0),
+                  vl(XLEN-1 downto 0), 
+                  vstart(lgVLEN-1 downto 0),
+                  mask_reg,
+                  r_offset(lgVLEN-1 downto 0),
+                  w_offset(lgVLEN-1 downto 0)
+                  );  
     
     BANK_GEN:for i in 1 to NB_LANES-1 generate
-        Banks: Bank GENERIC MAP(VLMAX, REG_NUM, SEW_MAX, lgSEW_MAX, XLEN, VLEN)
-                    PORT MAP(clk, newInst, 
-                    OutPort((READ_PORTS_PER_LANE*i+1)*SEW_MAX -1 downto READ_PORTS_PER_LANE*i*SEW_MAX),
-                    OutPort((READ_PORTS_PER_LANE*i+2)*SEW_MAX -1 downto (READ_PORTS_PER_LANE*i+1)*SEW_MAX),
+        Banks: Bank GENERIC MAP(REG_NUM, ELEN, lgELEN, XLEN, VLEN,lgVLEN)
+                    PORT MAP(clk, newInst(i), 
+                    OutPort((READ_PORTS_PER_LANE*i+1)*ELEN -1 downto READ_PORTS_PER_LANE*i*ELEN),
+                    OutPort((READ_PORTS_PER_LANE*i+2)*ELEN -1 downto (READ_PORTS_PER_LANE*i+1)*ELEN),
                     RegSel((READ_PORTS_PER_LANE*i+1)*REGS_PER_BANK-1 downto READ_PORTS_PER_LANE*i*REGS_PER_BANK), 
                     RegSel((READ_PORTS_PER_LANE*i+2)*REGS_PER_BANK-1 downto (READ_PORTS_PER_LANE*i+1)*REGS_PER_BANK),
                     WriteEn(i), 
-                    WriteData((i+1)*SEW_MAX-1 downto i*SEW_MAX),
+                    WriteData((i+1)*ELEN-1 downto i*ELEN),
                     WriteDest((i+1)*REGS_PER_BANK-1 downto i*REGS_PER_BANK), 
-                    sew,
+                    sew((i+1)*3-1 downto i*3),
+                    vlmul((i+1)*3-1 downto i*3),
                     vl((i+1)*XLEN-1 downto i*XLEN), 
-                    vstart((i+1)*XLEN-1 downto i*XLEN),
-                    reg_offset((i+1)*lgSEW_MAX-1 downto i*lgSEW_MAX));   
+                    vstart((i+1)*lgVLEN-1 downto i*lgVLEN),
+                    r_offset((i+1)*lgVLEN-1 downto i*lgVLEN),
+                    w_offset((i+1)*lgVLEN-1 downto i*lgVLEN)
+                    );   
     
     
     end generate BANK_GEN;

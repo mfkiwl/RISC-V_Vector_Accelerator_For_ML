@@ -224,7 +224,7 @@ end component;
  signal    memwidth_sig: STD_LOGIC_VECTOR(3 downto 0);
  signal    lane_idx:integer:=0;
  signal    test:STD_LOGIC_VECTOR(XLEN*NB_LANES-1 downto 0);
- signal    state : std_logic := '0';
+
  signal    newInst_sig:std_logic; --signal asserted by newInstGen process due to incoming vector instruction
  signal    RegSel_sig:STD_LOGIC_VECTOR((READ_PORTS_PER_LANE*NB_LANES*REGS_PER_BANK)-1 downto 0);   
  signal    Xdata_pipeline: STD_LOGIC_VECTOR(XLEN-1 downto 0);
@@ -254,7 +254,13 @@ end component;
  signal    extension_pipeline: STD_LOGIC;
  signal    memwidth_pipeline: STD_LOGIC_VECTOR(3 downto 0);
  signal    newInst_pipeline:std_logic; --signal asserted by newInstGen process due to incoming vector instruction
+ signal    vm_sig: std_logic;
+ signal    vm_pipeline:std_logic;
 
+
+ type States is (RESET,TRIGGER); 
+ signal    NS : States ;
+ signal    CS : States ;
 begin
 
 Dec: Decoder PORT MAP (d_vect_inst=>vect_inst,
@@ -264,7 +270,7 @@ Dec: Decoder PORT MAP (d_vect_inst=>vect_inst,
                        d_zimm=>zimm_sig,
                        d_mew=>mew_sig,
                        d_mop=>mop_sig,
-                       d_vm=>vm,
+                       d_vm=>vm_sig,
                        d_vs2_rs2=>rs2_sig,
                        d_rs1=>rs1_sig,
                        d_funct3_width=>funct3_sig,
@@ -317,33 +323,33 @@ PORT MAP (clk_in=>clk_in,
           cu_NI_1=> NI_1, 
           cu_NI_2=>NI_2);
 
-  newInstGen:process (clk_in, rst, incoming_inst)
+  
+  newInstGen:process (incoming_inst,clk_in)
   begin
-    if rst = '1' then
-      state <= '0';
-    elsif rising_edge (incoming_inst) then
-      state <= '1';
-    elsif state = '1' then
---      if rising_edge (clk) then
---        newInst <= '1';
-      if falling_edge (clk_in) then
-        state <= '0';
-      end if;
+
+    if rising_edge (clk_in) then
+        if rising_edge(incoming_inst) then
+            newInst_sig<='1';
+            
+        end if;
+    else
+        newInst_sig<='0';
     end if;
 
-  end process;
-  newInst_sig<='1' when state='1' else
-           '0' when state='0';
+end process;
+--newInst_sig<='1' when state='1' else
+--   '0' when state='0';
 
 
 PIPELINE:process(clk_in,Xdata_in,newInst_sig,vstart_sig,vl_sig)
 begin
-if (rising_edge(clk_in)) then
-    Xdata_pipeline<=Xdata_in;
-    vl_pipeline<=vl_sig;
-    newInst_pipeline<=newInst_sig;
-    vstart_pipeline<=vstart_sig;
-end if;
+    if (rising_edge(clk_in)) then
+        Xdata_pipeline<=Xdata_in;
+        vl_pipeline<=vl_sig;
+        newInst_pipeline<=newInst_sig;
+        vstart_pipeline<=vstart_sig;
+        vm_pipeline<=vm_sig;
+    end if;
 end process;
 
 lane_idx<=to_integer(unsigned(rd_sig(4 downto 4-(lgNB_LANES-1)))); --lane_idx specifies the index of the bank/lane we are using
@@ -351,15 +357,17 @@ lane_idx<=to_integer(unsigned(rd_sig(4 downto 4-(lgNB_LANES-1)))); --lane_idx sp
 LANE_PICKER:process(clk_in,newInst_pipeline,lane_idx,vill_sig,vma_sig,vta_sig,vlmul_sig,sew_sig,vstart_sig,nf_sig,mop_sig,vl_sig,funct3_sig,funct6_sig,rs1_sig,rs2_sig,WriteEn_sig,SrcB_sig,MemWrite_sig,MemRead_sig,WBSrc_sig,extension_sig,memwidth_sig,Xdata_in) 
 begin
     
-    if newInst_pipeline='1' then
-       newInst_out(NB_LANES-1 downto lane_idx+1)<=(others=>'0');
-       newInst_out(lane_idx)<='1';
-       newInst_out(lane_idx-1 downto 0)<=(others=>'0');
-    elsif newInst_pipeline='0' then
-       newInst_out<=(others=>'0');
-    end if;
+--    if newInst_sig='1' then
+--       newInst_out(NB_LANES-1 downto lane_idx+1)<=(others=>'0');
+--       newInst_out(lane_idx)<='1';
+--       newInst_out(lane_idx-1 downto 0)<=(others=>'0');
+--    elsif newInst_sig='0' then
+--       newInst_out<=(others=>'0');
+--    end if;
         
     if(rising_edge(clk_in)) then
+        newInst_out(lane_idx)<=newInst_sig;
+        vm<=vm_sig;
         vill(lane_idx)<=vill_sig;
         vma(lane_idx)<=vma_sig;
         vta(lane_idx)<=vta_sig;

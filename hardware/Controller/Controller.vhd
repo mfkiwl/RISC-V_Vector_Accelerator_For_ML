@@ -256,8 +256,7 @@ end component;
  signal    newInst_pipeline:std_logic; --signal asserted by newInstGen process due to incoming vector instruction
  signal    vm_sig: std_logic;
  signal    vm_pipeline:std_logic;
-
-
+ 
  type States is (RESET,TRIGGER); 
  signal    NS : States ;
  signal    CS : States ;
@@ -325,15 +324,18 @@ PORT MAP (clk_in=>clk_in,
 
   
   newInstGen:process (incoming_inst,clk_in)
+    variable NI_set: std_logic:='0';
   begin
 
     if rising_edge (clk_in) then
-        if rising_edge(incoming_inst) then
-            newInst_sig<='1';
-            
+        if NI_set='1' then 
+            newInst_sig<='0';
+            NI_set:= '0';
         end if;
-    else
-        newInst_sig<='0';
+        if rising_edge(incoming_inst) and NI_set='0' then
+            newInst_sig<='1';
+            NI_set:='1';
+        end if; 
     end if;
 
 end process;
@@ -346,13 +348,16 @@ begin
     if (rising_edge(clk_in)) then
         Xdata_pipeline<=Xdata_in;
         vl_pipeline<=vl_sig;
+        --newInst_out(lane_idx)<= newInst_sig;
         newInst_pipeline<=newInst_sig;
         vstart_pipeline<=vstart_sig;
         vm_pipeline<=vm_sig;
+        rd_pipeline<= rd_sig;
     end if;
 end process;
 
-lane_idx<=to_integer(unsigned(rd_sig(4 downto 4-(lgNB_LANES-1)))); --lane_idx specifies the index of the bank/lane we are using
+lane_idx<=to_integer(unsigned(rd_pipeline(4 downto 4-(lgNB_LANES-1)))); --lane_idx specifies the index of the bank/lane we are using
+
 -- Process to pick the lane based on MSB of rd_sig. This works under the assumption that we can only read and write to the same bank
 LANE_PICKER:process(clk_in,newInst_pipeline,lane_idx,vill_sig,vma_sig,vta_sig,vlmul_sig,sew_sig,vstart_sig,nf_sig,mop_sig,vl_sig,funct3_sig,funct6_sig,rs1_sig,rs2_sig,WriteEn_sig,SrcB_sig,MemWrite_sig,MemRead_sig,WBSrc_sig,extension_sig,memwidth_sig,Xdata_in) 
 begin
@@ -366,7 +371,7 @@ begin
 --    end if;
         
     if(rising_edge(clk_in)) then
-        newInst_out(lane_idx)<=newInst_sig;
+        newInst_out(lane_idx)<=newInst_pipeline;
         vm<=vm_sig;
         vill(lane_idx)<=vill_sig;
         vma(lane_idx)<=vma_sig;
@@ -382,7 +387,7 @@ begin
         funct6(6*(lane_idx+1)-1 downto 6*lane_idx)<=funct6_sig;    
         rs1((4-(lgNB_LANES-1))*(lane_idx+1)-1 downto (4-(lgNB_LANES-1))*lane_idx)<=rs1_sig(4-(lgNB_LANES-1)-1 downto 0);
         vs2_rs2((4-(lgNB_LANES-1))*(lane_idx+1)-1 downto (4-(lgNB_LANES-1))*lane_idx)<=rs2_sig(4-(lgNB_LANES-1)-1 downto 0);
-        vd_vs3((4-(lgNB_LANES-1))*(lane_idx+1)-1 downto (4-(lgNB_LANES-1))*lane_idx)<=rd_sig(4-(lgNB_LANES-1)-1 downto 0); 
+        vd_vs3((4-(lgNB_LANES-1))*(lane_idx+1)-1 downto (4-(lgNB_LANES-1))*lane_idx)<=rd_pipeline(4-(lgNB_LANES-1)-1 downto 0); 
         
         RegSel(2*(4-(lgNB_LANES-1))*(lane_idx+1)-1 downto 2*(4-(lgNB_LANES-1))*lane_idx)<=rs2_sig(4-(lgNB_LANES-1)-1 downto 0)&rs1_sig(4-(lgNB_LANES-1)-1 downto 0);
         Xdata(XLEN*(lane_idx+1)-1 downto XLEN*lane_idx)<=Xdata_pipeline;

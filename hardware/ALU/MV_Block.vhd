@@ -4,12 +4,12 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity MV_Block is
     generic (
-           SEW_MAX: integer:=32 --max element width
+           ELEN: integer:=1024 --max element width
            );
-    Port (  vs1_data: in STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); -- data from VS1 vector register
-            vs2_data: in STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); -- data from VS2 vector register
+    Port (  vs1_data: in STD_LOGIC_VECTOR(ELEN-1 downto 0); -- data from VS1 vector register
+            vs2_data: in STD_LOGIC_VECTOR(ELEN-1 downto 0); -- data from VS2 vector register
             mask_in: in STD_LOGIC; --mask bit of ith element
-            data_out: out STD_LOGIC_VECTOR(SEW_MAX-1 downto 0)
+            data_out: out STD_LOGIC_VECTOR(ELEN-1 downto 0)
      );
 end MV_Block;
 

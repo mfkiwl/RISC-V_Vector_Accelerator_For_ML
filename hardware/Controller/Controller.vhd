@@ -347,59 +347,67 @@ PIPELINE:process(clk_in,Xdata_in,newInst_sig,vstart_sig,vl_sig)
 begin
     if (rising_edge(clk_in)) then
         Xdata_pipeline<=Xdata_in;
-        vl_pipeline<=vl_sig;
-        --newInst_out(lane_idx)<= newInst_sig;
+        funct6_pipeline<=funct6_sig;
+        opcode_pipeline<=opcode_sig;
+        funct3_pipeline<=funct3_sig;
+        rs1_pipeline<=rs1_sig;
+        rs2_pipeline<=rs2_sig;
+        rd_pipeline<=rd_sig;
+        vm_pipeline<=vm_sig;  
+        bit31_pipeline<=bit31_sig;
+        mew_pipeline<=mew_sig;
+        zimm_pipeline<=zimm_sig; 
+        mop_pipeline<=mop_sig;  
+        nf_pipeline<=nf_sig;
+          
+        
         newInst_pipeline<=newInst_sig;
-        vstart_pipeline<=vstart_sig;
-        vm_pipeline<=vm_sig;
-        rd_pipeline<= rd_sig;
+
     end if;
 end process;
 
 lane_idx<=to_integer(unsigned(rd_pipeline(4 downto 4-(lgNB_LANES-1)))); --lane_idx specifies the index of the bank/lane we are using
 
 -- Process to pick the lane based on MSB of rd_sig. This works under the assumption that we can only read and write to the same bank
-LANE_PICKER:process(clk_in,newInst_pipeline,lane_idx,vill_sig,vma_sig,vta_sig,vlmul_sig,sew_sig,vstart_sig,nf_sig,mop_sig,vl_sig,funct3_sig,funct6_sig,rs1_sig,rs2_sig,WriteEn_sig,SrcB_sig,MemWrite_sig,MemRead_sig,WBSrc_sig,extension_sig,memwidth_sig,Xdata_in) 
-begin
-    
---    if newInst_sig='1' then
---       newInst_out(NB_LANES-1 downto lane_idx+1)<=(others=>'0');
---       newInst_out(lane_idx)<='1';
---       newInst_out(lane_idx-1 downto 0)<=(others=>'0');
---    elsif newInst_sig='0' then
---       newInst_out<=(others=>'0');
---    end if;
+LANE_PICKER:process(clk_in,newInst_pipeline,lane_idx,nf_pipeline,mop_pipeline,funct3_pipeline,funct6_pipeline,rs1_pipeline,rs2_pipeline,WriteEn_sig,SrcB_sig,MemWrite_sig,MemRead_sig,WBSrc_sig,extension_sig,memwidth_pipeline,Xdata_pipeline,vl_sig) 
+
+begin   
+    if newInst_pipeline='1' then
+       newInst_out(NB_LANES-1 downto lane_idx+1)<=(others=>'0');
+       newInst_out(lane_idx)<='1';
+       newInst_out(lane_idx-1 downto 0)<=(others=>'0');
+    elsif newInst_pipeline='0' then
+       newInst_out<=(others=>'0');
+    end if;
         
     if(rising_edge(clk_in)) then
-        newInst_out(lane_idx)<=newInst_pipeline;
-        vm<=vm_sig;
-        vill(lane_idx)<=vill_sig;
-        vma(lane_idx)<=vma_sig;
-        vta(lane_idx)<=vta_sig;
-        vlmul(3*(lane_idx+1)-1 downto 3*lane_idx)<=vlmul_sig; 
-        sew(3*(lane_idx+1)-1 downto 3*lane_idx)<=sew_sig;
-        vstart(lgVLEN*(lane_idx+1)-1 downto lgVLEN*lane_idx)<=vstart_pipeline; 
-        nf(3*(lane_idx+1)-1 downto 3*lane_idx)<=nf_sig;
-        mop(2*(lane_idx+1)-1 downto 2*lane_idx)<=mop_sig;
-        vl(XLEN*(lane_idx+1)-1 downto XLEN*lane_idx)<=vl_pipeline;  
-        funct3_width(3*(lane_idx+1)-1 downto 3*lane_idx)<=funct3_sig; 
-        
-        funct6(6*(lane_idx+1)-1 downto 6*lane_idx)<=funct6_sig;    
-        rs1((4-(lgNB_LANES-1))*(lane_idx+1)-1 downto (4-(lgNB_LANES-1))*lane_idx)<=rs1_sig(4-(lgNB_LANES-1)-1 downto 0);
-        vs2_rs2((4-(lgNB_LANES-1))*(lane_idx+1)-1 downto (4-(lgNB_LANES-1))*lane_idx)<=rs2_sig(4-(lgNB_LANES-1)-1 downto 0);
+        vm<=vm_pipeline;
+--        vill(lane_idx)<=vill_sig;
+--        vma(lane_idx)<=vma_sig;
+--        vta(lane_idx)<=vta_sig;
+--        vlmul(3*(lane_idx+1)-1 downto 3*lane_idx)<=vlmul_sig; 
+        sew(3*(lane_idx+1)-1 downto 3*lane_idx)<=sew_pipeline;
+--        vstart(lgVLEN*(lane_idx+1)-1 downto lgVLEN*lane_idx)<=vstart_pipeline; 
+--        nf(3*(lane_idx+1)-1 downto 3*lane_idx)<=nf_sig;
+--        mop(2*(lane_idx+1)-1 downto 2*lane_idx)<=mop_sig;
+        vl(XLEN*(lane_idx+1)-1 downto XLEN*lane_idx)<=vl_sig;  
+        funct3_width(3*(lane_idx+1)-1 downto 3*lane_idx)<=funct3_pipeline; 
+        funct6(6*(lane_idx+1)-1 downto 6*lane_idx)<=funct6_pipeline;    
+--        rs1((4-(lgNB_LANES-1))*(lane_idx+1)-1 downto (4-(lgNB_LANES-1))*lane_idx)<=rs1_sig(4-(lgNB_LANES-1)-1 downto 0);
+--        vs2_rs2((4-(lgNB_LANES-1))*(lane_idx+1)-1 downto (4-(lgNB_LANES-1))*lane_idx)<=rs2_sig(4-(lgNB_LANES-1)-1 downto 0);
         vd_vs3((4-(lgNB_LANES-1))*(lane_idx+1)-1 downto (4-(lgNB_LANES-1))*lane_idx)<=rd_pipeline(4-(lgNB_LANES-1)-1 downto 0); 
         
-        RegSel(2*(4-(lgNB_LANES-1))*(lane_idx+1)-1 downto 2*(4-(lgNB_LANES-1))*lane_idx)<=rs2_sig(4-(lgNB_LANES-1)-1 downto 0)&rs1_sig(4-(lgNB_LANES-1)-1 downto 0);
+        RegSel(2*(4-(lgNB_LANES-1))*(lane_idx+1)-1 downto 2*(4-(lgNB_LANES-1))*lane_idx)<=rs2_pipeline(4-(lgNB_LANES-1)-1 downto 0)&rs1_pipeline(4-(lgNB_LANES-1)-1 downto 0);
         Xdata(XLEN*(lane_idx+1)-1 downto XLEN*lane_idx)<=Xdata_pipeline;
-        WriteDest((4-(lgNB_LANES-1))*(lane_idx+1)-1 downto (4-(lgNB_LANES-1))*lane_idx)<=rd_sig(4-(lgNB_LANES-1)-1 downto 0); 
+--        WriteDest((4-(lgNB_LANES-1))*(lane_idx+1)-1 downto (4-(lgNB_LANES-1))*lane_idx)<=rd_sig(4-(lgNB_LANES-1)-1 downto 0); 
         WriteEn(lane_idx)<=WriteEn_sig;
-        MemWrite(lane_idx)<=MemWrite_sig;
-        SrcB(2*(lane_idx+1)-1 downto 2*lane_idx)<=SrcB_sig;
-        MemRead(lane_idx)<=MemRead_sig;
-        WBSrc(lane_idx)<=WBSrc_sig;
-        extension(lane_idx)<=extension_sig;
-        memwidth(4*(lane_idx+1)-1 downto 4*lane_idx)<=memwidth_sig;
-        Idata(5*(lane_idx+1)-1 downto 5*lane_idx)<=rs1_sig;
+--        MemWrite(lane_idx)<=MemWrite_sig;
+--        SrcB(2*(lane_idx+1)-1 downto 2*lane_idx)<=SrcB_sig;
+--        MemRead(lane_idx)<=MemRead_sig;
+--        WBSrc(lane_idx)<=WBSrc_sig;
+--        extension(lane_idx)<=extension_sig;
+--        memwidth(4*(lane_idx+1)-1 downto 4*lane_idx)<=memwidth_sig;
+--        Idata(5*(lane_idx+1)-1 downto 5*lane_idx)<=rs1_sig;
     end if;
 
 end process; 

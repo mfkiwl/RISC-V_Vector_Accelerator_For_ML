@@ -8,6 +8,7 @@ architecture ALU_with_pipeline_tb_arch of ALU_with_pipeline_tb is
 
 component ALU_with_pipeline is
     generic(
+           NB_LANES: integer:=2; --Number of lanes            
            VLMAX: integer :=32; -- Max Vector Length (max number of elements) 
            SEW_MAX: integer:=32;
            lgSEW_MAX: integer:=5;
@@ -18,68 +19,46 @@ component ALU_with_pipeline is
             rst: in STD_LOGIC;
             busy: in STD_LOGIC;
             mask_in: in STD_LOGIC;
-            Xdata_1: in STD_LOGIC_VECTOR(XLEN-1 downto 0); --data from scalar register for Lane 1
-            Xdata_2: in STD_LOGIC_VECTOR(XLEN-1 downto 0); --data from scalar register for Lane 2
-            Vdata1_1: in STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --data coming from vector register to Lane 1
-            Vdata2_1: in STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --data coming from vector register to Lane 1
-            Vdata1_2: in STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --data coming from vector register to Lane 2
-            Vdata2_2: in STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --data coming from vector register to Lane 2
-            Idata_1: in STD_LOGIC_VECTOR(4 downto 0); --data coming from immediate field to Lane 1
-            Idata_2: in STD_LOGIC_VECTOR(4 downto 0); --data coming from immediate field to Lane 2
-            op2_src_1: in STD_LOGIC_VECTOR(1 downto 0); -- selects between scalar/vector reg or immediate from operand 2 for Lane 1
+            Xdata: in STD_LOGIC_VECTOR(NB_LANES*XLEN-1 downto 0); --data from scalar register
+            Vdata: in STD_LOGIC_VECTOR(2*NB_LANES*SEW_MAX-1 downto 0); --data coming from Register File, 2 since we always have 2 operands
+            Idata: in STD_LOGIC_VECTOR(NB_LANES*5-1 downto 0); --data coming from immediate field of size 5 bits
+            op2_src: in STD_LOGIC_VECTOR(2*NB_LANES-1 downto 0); -- selects between scalar/vector reg or immediate from operand 2 
                                                 -- 00 = vector reg
                                                 -- 01 = scalar reg
                                                 -- 10 = immediate
                                                 -- 11 = RESERVED (unbound)
-            op2_src_2: in STD_LOGIC_VECTOR(1 downto 0); -- selects between scalar/vector reg or immediate from operand 2 for Lane 2
-            funct6_1: in STD_LOGIC_VECTOR(5 downto 0); --to know which operation
-            funct6_2: in STD_LOGIC_VECTOR(5 downto 0); --to know which operation
-            funct3_1: in STD_LOGIC_VECTOR(2 downto 0); --to know which operation
-            funct3_2: in STD_LOGIC_VECTOR(2 downto 0); --to know which operation
-            WriteEn_i_1: in STD_LOGIC; --WriteEn for Lane 1 from controller
-            WriteEn_i_2: in STD_LOGIC; --WriteEn for Lane 2 from controller
-            WriteEn_o_1: out STD_LOGIC; --WriteEn for Lane 1 out to Register File
-            WriteEn_o_2: out STD_LOGIC; --WriteEn for Lane 2 out to Register File
-            result_1: out STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --result from Lane 1
-            result_2: out STD_LOGIC_VECTOR(SEW_MAX-1 downto 0) --result from Lane 2
+            funct6: in STD_LOGIC_VECTOR(NB_LANES*6-1 downto 0); --to know which operation
+            funct3: in STD_LOGIC_VECTOR (NB_LANES*3-1 downto 0); --to know which operation
+            WriteEn_i: in STD_LOGIC_VECTOR(NB_LANES-1 downto 0); --WriteEn from controller
+            WriteEn_o: out STD_LOGIC_VECTOR(NB_LANES-1 downto 0); --WriteEn out to Register File
+            result: out STD_LOGIC_VECTOR(NB_LANES*SEW_MAX-1 downto 0) --result vector
             );
 end component;
-
+constant    NB_LANES: integer:=2; --Number of lanes  
 constant    VLMAX: integer :=32; -- Max Vector Length (max number of elements) 
 constant    SEW_MAX: integer:=32;
 constant    lgSEW_MAX: integer:=5;
 constant    XLEN:integer:=32; --Register width
 constant    VLEN:integer:=32; --number of bits in register
 
-signal      clk: STD_LOGIC; 
-signal      rst: STD_LOGIC;
-signal      busy: STD_LOGIC;
-signal      Xdata_1: STD_LOGIC_VECTOR(XLEN-1 downto 0); --data from scalar register for Lane 1
-signal      Xdata_2: STD_LOGIC_VECTOR(XLEN-1 downto 0); --data from scalar register for Lane 2
-signal      Vdata1_1: STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --data coming from vector register to Lane 1
-signal      Vdata2_1: STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --data coming from vector register to Lane 1
-signal      Vdata1_2: STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --data coming from vector register to Lane 2
-signal      Vdata2_2: STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --data coming from vector register to Lane 2
-signal      Idata_1: STD_LOGIC_VECTOR(4 downto 0); --data coming from immediate field to Lane 1
-signal      Idata_2: STD_LOGIC_VECTOR(4 downto 0); --data coming from immediate field to Lane 2
-signal      op2_src_1: STD_LOGIC_VECTOR(1 downto 0); -- selects between scalar/vector reg or immediate from operand 2 for Lane 1
-signal      op2_src_2: STD_LOGIC_VECTOR(1 downto 0); -- selects between scalar/vector reg or immediate from operand 2 for Lane 2
-signal      funct6_1: STD_LOGIC_VECTOR(5 downto 0); --to know which operation
-signal      funct6_2: STD_LOGIC_VECTOR(5 downto 0); --to know which operation
-signal      funct3_1: STD_LOGIC_VECTOR(2 downto 0); --to know which operation
-signal      funct3_2: STD_LOGIC_VECTOR(2 downto 0); --to know which operation
-signal      WriteEn_i_1: STD_LOGIC; --WriteEn for Lane 1 from controller
-signal      WriteEn_i_2: STD_LOGIC; --WriteEn for Lane 2 from controller
-signal      WriteEn_o_1: STD_LOGIC; --WriteEn for Lane 1 out to Register File
-signal      WriteEn_o_2: STD_LOGIC; --WriteEn for Lane 2 out to Register File
-signal      result_1: STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --result from Lane 1
-signal      result_2: STD_LOGIC_VECTOR(SEW_MAX-1 downto 0); --result from Lane 2
-signal      mask_in: STD_LOGIC;
+signal      clk:  STD_LOGIC; 
+signal      rst:  STD_LOGIC;
+signal      busy:  STD_LOGIC;
+signal      mask_in:  STD_LOGIC;
+signal      Xdata:  STD_LOGIC_VECTOR(NB_LANES*XLEN-1 downto 0); --data from scalar register
+signal      Vdata:  STD_LOGIC_VECTOR(2*NB_LANES*SEW_MAX-1 downto 0); --data coming from Register File, 2 since we always have 2 operands
+signal      Idata:  STD_LOGIC_VECTOR(NB_LANES*5-1 downto 0); --data coming from immediate field of size 5 bits
+signal      op2_src:  STD_LOGIC_VECTOR(2*NB_LANES-1 downto 0); -- selects between scalar/vector reg or immediate from operand 2 
+signal      funct6:  STD_LOGIC_VECTOR(NB_LANES*6-1 downto 0); --to know which operation
+signal      funct3:  STD_LOGIC_VECTOR (NB_LANES*3-1 downto 0); --to know which operation
+signal      WriteEn_i:  STD_LOGIC_VECTOR(NB_LANES-1 downto 0); --WriteEn from controller
+signal      WriteEn_o:  STD_LOGIC_VECTOR(NB_LANES-1 downto 0); --WriteEn out to Register File
+signal      result: STD_LOGIC_VECTOR(NB_LANES*SEW_MAX-1 downto 0); --result vector
 begin
-    DUT: ALU_with_pipeline generic map(VLMAX, SEW_MAX, lgSEW_MAX, XLEN, VLEN)
+    DUT: ALU_with_pipeline generic map(NB_LANES,VLMAX, SEW_MAX, lgSEW_MAX, XLEN, VLEN)
                            port map(clk,rst,busy,mask_in,
-                                    Xdata_1,Xdata_2,Vdata1_1,Vdata2_1,Vdata1_2,Vdata2_2,Idata_1,Idata_2,
-                                    op2_src_1,op2_src_2,funct6_1,funct6_2,funct3_1,funct3_2,WriteEn_i_1,WriteEn_i_2,WriteEn_o_1,WriteEn_o_2,result_1, result_2);
+                                    Xdata,Vdata,Idata,
+                                    op2_src,funct6,funct3,WriteEn_i,WriteEn_o,result);
                                     
     clk_proc: process begin
         clk<='0';
@@ -89,10 +68,20 @@ begin
     end process;
     
     process begin
-        rst<='1'; wait for 10ns; rst<= '0'; busy<='0';funct3_1<="000";funct3_2<="000"; Xdata_1<= x"00000006"; Xdata_2<= x"00000003"; Vdata1_1<= x"FFFFFFF5"; Vdata2_1<= x"FFFFFFF5"; Vdata1_2<= x"FFFFFFF3"; Vdata2_2<= x"FFFFFFF2";
-        Idata_1<= "00011"; Idata_2<= "00111"; op2_src_1<= "00"; op2_src_2<= "00"; funct6_1<="000000"; funct6_2<="000000";  WriteEn_i_1<= '1'; WriteEn_i_2<= '1'; wait for 8ns;
-        Vdata1_1<= x"00000003";  Vdata1_2<= x"00000008"; op2_src_1<= "01"; op2_src_2<= "10"; wait for 8 ns;
-        Vdata1_1<= x"00000006";  Vdata1_2<= x"00000007"; op2_src_1<= "00"; op2_src_2<= "00";Vdata1_2<= x"FFFFFFF4"; Vdata2_2<= x"FFFFFFF3";funct6_1<="010111";funct6_2<="010111";mask_in<='1';wait for 8ns;
+        rst<='1'; wait for 10ns; rst<= '0'; busy<='0';
+        funct3<="000000";
+        Xdata<= x"0000000300000006";
+        Vdata<= x"FFFFFFF2FFFFFFF3FFFFFFF5FFFFFFF5"; 
+        Idata<= "0011100011"; 
+        op2_src<= "0000";
+        funct6<="000000000000";
+        WriteEn_i<= "11"; wait for 8ns;
+        Vdata<= x"FFFFFFF200000008FFFFFFF500000003";
+        op2_src<= "1001"; wait for 8 ns;
+        Vdata<= x"FFFFFFF200000007FFFFFFF500000006";
+        op2_src<= "0000";
+        Vdata<= x"FFFFFFF3000000070000000600000003"; 
+        funct6<="010111000010";mask_in<='1';wait for 8ns;
         wait; 
     end process;
 

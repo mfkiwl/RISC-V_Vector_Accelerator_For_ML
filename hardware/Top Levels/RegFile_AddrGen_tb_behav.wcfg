@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="RegFile_AddrGen_tb_behav.wdb" id="1">
+         <top_modules>
+            <top_module name="RegFile_AddrGen_tb" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="8000000fs"></ZoomStartTime>
+      <ZoomEndTime time="31320001fs"></ZoomEndTime>
+      <Cursor1Time time="30000000fs"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="304"></NameColumnWidth>
+      <ValueColumnWidth column_width="262"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="17" />
+   <wvobject fp_name="/RegFile_AddrGen_tb/i_clk" type="logic">
+      <obj_property name="ElementShortName">i_clk</obj_property>
+      <obj_property name="ObjectShortName">i_clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_AddrGen_tb/newInst" type="logic">
+      <obj_property name="ElementShortName">newInst</obj_property>
+      <obj_property name="ObjectShortName">newInst</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_AddrGen_tb/mask_bit" type="logic">
+      <obj_property name="ElementShortName">mask_bit</obj_property>
+      <obj_property name="ObjectShortName">mask_bit</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_AddrGen_tb/OutPort" type="array">
+      <obj_property name="ElementShortName">OutPort[127:0]</obj_property>
+      <obj_property name="ObjectShortName">OutPort[127:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_AddrGen_tb/RegSel" type="array">
+      <obj_property name="ElementShortName">RegSel[15:0]</obj_property>
+      <obj_property name="ObjectShortName">RegSel[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_AddrGen_tb/WriteEn" type="array">
+      <obj_property name="ElementShortName">WriteEn[1:0]</obj_property>
+      <obj_property name="ObjectShortName">WriteEn[1:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_AddrGen_tb/s_WriteEn" type="array">
+      <obj_property name="ElementShortName">s_WriteEn[1:0]</obj_property>
+      <obj_property name="ObjectShortName">s_WriteEn[1:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_AddrGen_tb/WriteData" type="array">
+      <obj_property name="ElementShortName">WriteData[63:0]</obj_property>
+      <obj_property name="ObjectShortName">WriteData[63:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_AddrGen_tb/s_WriteData" type="array">
+      <obj_property name="ElementShortName">s_WriteData[63:0]</obj_property>
+      <obj_property name="ObjectShortName">s_WriteData[63:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_AddrGen_tb/WriteDest" type="array">
+      <obj_property name="ElementShortName">WriteDest[7:0]</obj_property>
+      <obj_property name="ObjectShortName">WriteDest[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_AddrGen_tb/s_WriteDest" type="array">
+      <obj_property name="ElementShortName">s_WriteDest[7:0]</obj_property>
+      <obj_property name="ObjectShortName">s_WriteDest[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_AddrGen_tb/vl" type="array">
+      <obj_property name="ElementShortName">vl[63:0]</obj_property>
+      <obj_property name="ObjectShortName">vl[63:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_AddrGen_tb/UUT/\AddrGen_GEN(0)\/AddrGen/o_offset" type="array">
+      <obj_property name="ElementShortName">o_offset[4:0]</obj_property>
+      <obj_property name="ObjectShortName">o_offset[4:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_AddrGen_tb/UUT/RegFile/BankA/registers" type="array">
+      <obj_property name="ElementShortName">registers[0:15][31:0]</obj_property>
+      <obj_property name="ObjectShortName">registers[0:15][31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_AddrGen_tb/UUT/RegFile/\BANK_GEN(1)\/Banks/registers" type="array">
+      <obj_property name="ElementShortName">registers[0:15][31:0]</obj_property>
+      <obj_property name="ObjectShortName">registers[0:15][31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_AddrGen_tb/UUT/RegFile/WriteEn" type="array">
+      <obj_property name="ElementShortName">WriteEn[1:0]</obj_property>
+      <obj_property name="ObjectShortName">WriteEn[1:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_AddrGen_tb/UUT/RegFile/\BANK_GEN(1)\/Banks/WriteEn" type="logic">
+      <obj_property name="ElementShortName">WriteEn</obj_property>
+      <obj_property name="ObjectShortName">WriteEn</obj_property>
+   </wvobject>
+</wave_config>

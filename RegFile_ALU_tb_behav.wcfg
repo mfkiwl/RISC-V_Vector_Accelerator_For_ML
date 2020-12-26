@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="RegFile_ALU_tb_behav.wdb" id="1">
+         <top_modules>
+            <top_module name="RegFile_ALU_tb" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="0fs"></ZoomStartTime>
+      <ZoomEndTime time="97250796fs"></ZoomEndTime>
+      <Cursor1Time time="1000000000fs"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="304"></NameColumnWidth>
+      <ValueColumnWidth column_width="262"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="19" />
+   <wvobject fp_name="/RegFile_ALU_tb/clk" type="logic">
+      <obj_property name="ElementShortName">clk</obj_property>
+      <obj_property name="ObjectShortName">clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_ALU_tb/newInst" type="array">
+      <obj_property name="ElementShortName">newInst[1:0]</obj_property>
+      <obj_property name="ObjectShortName">newInst[1:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_ALU_tb/rst" type="logic">
+      <obj_property name="ElementShortName">rst</obj_property>
+      <obj_property name="ObjectShortName">rst</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_ALU_tb/Xdata" type="array">
+      <obj_property name="ElementShortName">Xdata[63:0]</obj_property>
+      <obj_property name="ObjectShortName">Xdata[63:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_ALU_tb/funct6" type="array">
+      <obj_property name="ElementShortName">funct6[11:0]</obj_property>
+      <obj_property name="ObjectShortName">funct6[11:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_ALU_tb/WriteEn_i" type="array">
+      <obj_property name="ElementShortName">WriteEn_i[1:0]</obj_property>
+      <obj_property name="ObjectShortName">WriteEn_i[1:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_ALU_tb/UUT/ALU/s_WriteEn_i" type="array">
+      <obj_property name="ElementShortName">s_WriteEn_i[1:0]</obj_property>
+      <obj_property name="ObjectShortName">s_WriteEn_i[1:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_ALU_tb/UUT/RF/RegFile/WriteEn" type="array">
+      <obj_property name="ElementShortName">WriteEn[1:0]</obj_property>
+      <obj_property name="ObjectShortName">WriteEn[1:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_ALU_tb/UUT/RF/RegFile/BankA/registers" type="array">
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="ElementShortName">registers[0:15][31:0]</obj_property>
+      <obj_property name="ObjectShortName">registers[0:15][31:0]</obj_property>
+      <obj_property name="label">BankA[0:15][31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_ALU_tb/UUT/RF/RegFile/\BANK_GEN(1)\/Banks/registers" type="array">
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="ElementShortName">registers[0:15][31:0]</obj_property>
+      <obj_property name="ObjectShortName">registers[0:15][31:0]</obj_property>
+      <obj_property name="label">BankB[0:15][31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_ALU_tb/UUT/RF/OutPort" type="array">
+      <obj_property name="ElementShortName">OutPort[4095:0]</obj_property>
+      <obj_property name="ObjectShortName">OutPort[4095:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_ALU_tb/UUT/ALU/s_result" type="array">
+      <obj_property name="ElementShortName">s_result[2047:0]</obj_property>
+      <obj_property name="ObjectShortName">s_result[2047:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_ALU_tb/UUT/RF/RegFile/WriteData" type="array">
+      <obj_property name="ElementShortName">WriteData[2047:0]</obj_property>
+      <obj_property name="ObjectShortName">WriteData[2047:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_ALU_tb/UUT/ALU/\LANES_GEN(0)\/ALU/operand1" type="array">
+      <obj_property name="ElementShortName">operand1[1023:0]</obj_property>
+      <obj_property name="ObjectShortName">operand1[1023:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_ALU_tb/UUT/ALU/\LANES_GEN(0)\/ALU/operand2" type="array">
+      <obj_property name="ElementShortName">operand2[1023:0]</obj_property>
+      <obj_property name="ObjectShortName">operand2[1023:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_ALU_tb/UUT/RF/w_offset_in" type="array">
+      <obj_property name="ElementShortName">w_offset_in[9:0]</obj_property>
+      <obj_property name="ObjectShortName">w_offset_in[9:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_ALU_tb/UUT/RF/w_offset_out" type="array">
+      <obj_property name="ElementShortName">w_offset_out[9:0]</obj_property>
+      <obj_property name="ObjectShortName">w_offset_out[9:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_ALU_tb/UUT/RF/RegFile/BankA/w_offset" type="array">
+      <obj_property name="ElementShortName">w_offset[4:0]</obj_property>
+      <obj_property name="ObjectShortName">w_offset[4:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_ALU_tb/UUT/RF/\OffsetGen_GEN(0)\/OffsetGens/o_offset" type="array">
+      <obj_property name="ElementShortName">o_offset[4:0]</obj_property>
+      <obj_property name="ObjectShortName">o_offset[4:0]</obj_property>
+   </wvobject>
+</wave_config>

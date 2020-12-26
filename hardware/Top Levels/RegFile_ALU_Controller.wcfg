@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="RegFile_ALU_Controller_tb_behav.wdb" id="1">
+         <top_modules>
+            <top_module name="RegFile_ALU_Controller_tb" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="0fs"></ZoomStartTime>
+      <ZoomEndTime time="188200001fs"></ZoomEndTime>
+      <Cursor1Time time="1000000000fs"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="300"></NameColumnWidth>
+      <ValueColumnWidth column_width="304"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="27" />
+   <wvobject fp_name="/RegFile_ALU_Controller_tb/clk_in" type="logic">
+      <obj_property name="ElementShortName">clk_in</obj_property>
+      <obj_property name="ObjectShortName">clk_in</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_ALU_Controller_tb/incoming_inst" type="logic">
+      <obj_property name="ElementShortName">incoming_inst</obj_property>
+      <obj_property name="ObjectShortName">incoming_inst</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_ALU_Controller_tb/UUT/CONT/newInst_sig" type="logic">
+      <obj_property name="ElementShortName">newInst_sig</obj_property>
+      <obj_property name="ObjectShortName">newInst_sig</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_ALU_Controller_tb/UUT/CONT/newInst_pipeline" type="logic">
+      <obj_property name="ElementShortName">newInst_pipeline</obj_property>
+      <obj_property name="ObjectShortName">newInst_pipeline</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_ALU_Controller_tb/UUT/REG_ALU/RF/\OffsetGen_GEN(0)\/OffsetGens/i_load" type="logic">
+      <obj_property name="ElementShortName">i_load</obj_property>
+      <obj_property name="ObjectShortName">i_load</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_ALU_Controller_tb/UUT/REG_ALU/RF/\OffsetGen_GEN(1)\/OffsetGens/i_load" type="logic">
+      <obj_property name="ElementShortName">i_load</obj_property>
+      <obj_property name="ObjectShortName">i_load</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_ALU_Controller_tb/UUT/CONT/rst" type="logic">
+      <obj_property name="ElementShortName">rst</obj_property>
+      <obj_property name="ObjectShortName">rst</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_ALU_Controller_tb/UUT/CONT/newInst_out" type="array">
+      <obj_property name="ElementShortName">newInst_out[1:0]</obj_property>
+      <obj_property name="ObjectShortName">newInst_out[1:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_ALU_Controller_tb/Xdata_in" type="array">
+      <obj_property name="ElementShortName">Xdata_in[31:0]</obj_property>
+      <obj_property name="ObjectShortName">Xdata_in[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_ALU_Controller_tb/vect_inst" type="array">
+      <obj_property name="ElementShortName">vect_inst[31:0]</obj_property>
+      <obj_property name="ObjectShortName">vect_inst[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_ALU_Controller_tb/UUT/REG_ALU/RF/RegFile/BankA/registers" type="array">
+      <obj_property name="ElementShortName">registers[0:15][31:0]</obj_property>
+      <obj_property name="ObjectShortName">registers[0:15][31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_ALU_Controller_tb/UUT/REG_ALU/RF/\OffsetGen_GEN(0)\/OffsetGens/i_mask" type="array">
+      <obj_property name="ElementShortName">i_mask[31:0]</obj_property>
+      <obj_property name="ObjectShortName">i_mask[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_ALU_Controller_tb/UUT/REG_ALU/RF/\OffsetGen_GEN(0)\/OffsetGens/i_vm" type="logic">
+      <obj_property name="ElementShortName">i_vm</obj_property>
+      <obj_property name="ObjectShortName">i_vm</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_ALU_Controller_tb/UUT/REG_ALU/RF/\OffsetGen_GEN(0)\/OffsetGens/NUM_ELEMENTS" type="other">
+      <obj_property name="ElementShortName">NUM_ELEMENTS</obj_property>
+      <obj_property name="ObjectShortName">NUM_ELEMENTS</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_ALU_Controller_tb/UUT/REG_ALU/RF/\OffsetGen_GEN(0)\/OffsetGens/current_mask" type="array">
+      <obj_property name="ElementShortName">current_mask[31:0]</obj_property>
+      <obj_property name="ObjectShortName">current_mask[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_ALU_Controller_tb/UUT/REG_ALU/RF/\OffsetGen_GEN(0)\/OffsetGens/i_vsew" type="array">
+      <obj_property name="ElementShortName">i_vsew[2:0]</obj_property>
+      <obj_property name="ObjectShortName">i_vsew[2:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_ALU_Controller_tb/UUT/REG_ALU/RF/\OffsetGen_GEN(0)\/OffsetGens/i_vlmul" type="array">
+      <obj_property name="ElementShortName">i_vlmul[2:0]</obj_property>
+      <obj_property name="ObjectShortName">i_vlmul[2:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_ALU_Controller_tb/UUT/REG_ALU/RF/\OffsetGen_GEN(0)\/OffsetGens/i_vl" type="array">
+      <obj_property name="ElementShortName">i_vl[31:0]</obj_property>
+      <obj_property name="ObjectShortName">i_vl[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_ALU_Controller_tb/UUT/REG_ALU/RF/\OffsetGen_GEN(0)\/OffsetGens/i_vstart" type="array">
+      <obj_property name="ElementShortName">i_vstart[4:0]</obj_property>
+      <obj_property name="ObjectShortName">i_vstart[4:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_ALU_Controller_tb/UUT/REG_ALU/RF/\OffsetGen_GEN(0)\/OffsetGens/i_vm" type="logic">
+      <obj_property name="ElementShortName">i_vm</obj_property>
+      <obj_property name="ObjectShortName">i_vm</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_ALU_Controller_tb/UUT/REG_ALU/RF/\OffsetGen_GEN(0)\/OffsetGens/o_offset" type="array">
+      <obj_property name="ElementShortName">o_offset[4:0]</obj_property>
+      <obj_property name="ObjectShortName">o_offset[4:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_ALU_Controller_tb/UUT/REG_ALU/RF/\OffsetGen_GEN(0)\/OffsetGens/o_done" type="logic">
+      <obj_property name="ElementShortName">o_done</obj_property>
+      <obj_property name="ObjectShortName">o_done</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_ALU_Controller_tb/UUT/REG_ALU/RF/\OffsetGen_GEN(0)\/OffsetGens/current_mask" type="array">
+      <obj_property name="ElementShortName">current_mask[31:0]</obj_property>
+      <obj_property name="ObjectShortName">current_mask[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_ALU_Controller_tb/UUT/CONT/CU/cu_sew" type="array">
+      <obj_property name="ElementShortName">cu_sew[2:0]</obj_property>
+      <obj_property name="ObjectShortName">cu_sew[2:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_ALU_Controller_tb/UUT/funct6_sig" type="array">
+      <obj_property name="ElementShortName">funct6_sig[11:0]</obj_property>
+      <obj_property name="ObjectShortName">funct6_sig[11:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_ALU_Controller_tb/UUT/RegSel_sig" type="array">
+      <obj_property name="ElementShortName">RegSel_sig[15:0]</obj_property>
+      <obj_property name="ObjectShortName">RegSel_sig[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/RegFile_ALU_Controller_tb/UUT/Xdata_sig" type="array">
+      <obj_property name="ElementShortName">Xdata_sig[63:0]</obj_property>
+      <obj_property name="ObjectShortName">Xdata_sig[63:0]</obj_property>
+   </wvobject>
+</wave_config>

@@ -3,6 +3,8 @@
 topnav:
 - title: Topnav
   items:
+    - title: FYP Information
+      url: /index
     - title: RISC-V Vector Processor Design
       url: /Vector-Processor-Design-Overview
     - title: GitHub Repository

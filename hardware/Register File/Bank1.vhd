@@ -4,29 +4,31 @@ use ieee.numeric_std.all;
 entity Bank1 is
 
     generic (
-           -- Max Vector Length (max number of elements) 
-           VLMAX: integer :=32;
            -- log(Number of Vector Registers)
            RegNum: integer:= 5; 
-           SEW_MAX: integer:=32;
-           lgSEW_MAX: integer:=5;
+           ELEN: integer:=1024;
+           lgELEN: integer:=10;
            XLEN:integer:=32; --Register width
-           VLEN:integer:=32 --number of bits in register
-    
+           VLEN:integer:=1024; --number of bits in register
+           lgVLEN:integer:=5
              );
     Port ( clk : in STD_LOGIC;
            newInst: in STD_LOGIC;
-           out1 : out STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
-           out2 : out STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
+           out1 : out STD_LOGIC_VECTOR (ELEN-1 downto 0);
+           out2 : out STD_LOGIC_VECTOR (ELEN-1 downto 0);
            mask_bit: out STD_LOGIC;
            RegSel1 : in STD_LOGIC_VECTOR (RegNum-2 downto 0);
            RegSel2 : in STD_LOGIC_VECTOR (RegNum-2 downto 0);
            WriteEn : in STD_LOGIC;
-           WriteData : in STD_LOGIC_VECTOR (SEW_MAX-1 downto 0);
+           WriteData : in STD_LOGIC_VECTOR (ELEN-1 downto 0);
            WriteDest : in STD_LOGIC_VECTOR (RegNum-2 downto 0);
-           sew: in STD_LOGIC_VECTOR (lgSEW_MAX-1 downto 0);
+           sew: in STD_LOGIC_VECTOR (2 downto 0);
+           vlmul: in STD_LOGIC_VECTOR(2 downto 0);
            vl: in STD_LOGIC_VECTOR(XLEN-1 downto 0);
-           vstart: in STD_LOGIC_VECTOR(XLEN-1 downto 0)
+           vstart: in STD_LOGIC_VECTOR(lgVLEN-1 downto 0);
+           mask_reg: out STD_LOGIC_VECTOR(VLEN-1 downto 0);
+           r_offset : in STD_LOGIC_VECTOR(lgVLEN-1 downto 0);
+           w_offset : in STD_LOGIC_VECTOR(lgVLEN-1 downto 0)
            );
 end Bank1;
 
@@ -35,39 +37,45 @@ architecture Bank1_arch of Bank1 is
     signal registers : registerFile;
     signal sew_int: integer;
     signal vl_int: integer;
+    signal w_offset_int: integer;
+    signal r_offset_int: integer;
+    signal VLMAX:natural;
 --    signal read_counter: integer range 0 to (VLEN-1); -- first bit to read from
 --    signal write_counter: integer range 0 to (VLEN-1); -- first bit to write to
 --    signal elements_read: integer range 0 to (VLMAX-1); -- # of elements read so far
 --    signal elements_written: integer range 0 to (VLMAX-1); -- # of elements written so far
 begin
 
-    sew_int<= to_integer(unsigned(sew)); --convert sew to integer for reading
-    vl_int<= to_integer(unsigned(vl)); --convert vl to integer
-    
-    p1: process(clk, newInst, RegSel1, RegSel2, WriteDest, WriteData, WriteEn, registers) is
-        variable read_counter: integer range 0 to (VLEN-1); -- first bit to read from
-        variable write_counter: integer range 0 to (VLEN-1); -- first bit to write to
-        variable elements_read: integer range 0 to (VLMAX-1); -- # of elements read so far
-        variable elements_written: integer range 0 to (VLMAX-1); -- # of elements written so far
-    begin
-        if(newInst = '1') then elements_read:=to_integer(unsigned(vstart)); elements_written:=to_integer(unsigned(vstart)); read_counter:=to_integer(unsigned(vstart))*sew_int; write_counter:=to_integer(unsigned(vstart))*sew_int; end if; --new instruction from dispatcher, reset counters
+    mask_reg<=registers(0);
 
-        if falling_edge(clk) then                                 
+    with sew select 
+    sew_int <= 8 when "000",
+           16 when "001",
+           32 when "010",
+           64 when "011",
+           128 when "100",
+           256 when "101",
+           512 when "110",
+           1024 when "111",
+           XLEN when others;
+           
+    vl_int<= to_integer(unsigned(vl)); --convert vl to integer
+    w_offset_int<= to_integer(unsigned(w_offset));
+    r_offset_int<= to_integer(unsigned(r_offset));
+    p1: process(clk, newInst, RegSel1, RegSel2, WriteDest, WriteData, WriteEn, registers,r_offset,w_offset) is
+    begin
+        if rising_edge(clk) then                                            
             if WriteEn = '1' then
                 --Write 
-                if(elements_written < vl_int) then
-                    registers(to_integer(unsigned(WriteDest)))((write_counter+sew_int-1) downto write_counter)<=WriteData(sew_int-1 downto 0);  
-                    write_counter:= write_counter+sew_int;
-                    elements_written:= elements_written+1;
+                if(w_offset_int < vl_int) then
+                    registers(to_integer(unsigned(WriteDest)))((sew_int*(w_offset_int+1)-1) downto sew_int*w_offset_int)<=WriteData(sew_int-1 downto 0);  
                 end if;
             end if;
-        elsif rising_edge(clk) then
-            if(elements_read < vl_int) then
-                mask_bit<=registers(0)(read_counter);
-                out1<= std_logic_vector(resize( signed((registers(to_integer(unsigned(RegSel1))) ((read_counter+sew_int-1) downto read_counter)) ), out1'length));
-                out2<= std_logic_vector(resize( signed((registers(to_integer(unsigned(RegSel2))) ((read_counter+sew_int-1) downto read_counter)) ), out2'length));
-                read_counter:= read_counter+sew_int;
-                elements_read:= elements_read+1;
+        elsif falling_edge(clk) then
+            if(r_offset_int < vl_int) then
+                mask_bit<=registers(0)(r_offset_int);
+                out1<= std_logic_vector(resize( signed((registers(to_integer(unsigned(RegSel1))) ((sew_int*(r_offset_int+1)-1) downto sew_int*r_offset_int)) ), out1'length));
+                out2<= std_logic_vector(resize( signed((registers(to_integer(unsigned(RegSel2))) ((sew_int*(r_offset_int+1)-1) downto sew_int*r_offset_int)) ), out2'length));
             end if;
         end if;
     end process;

@@ -1,0 +1,36 @@
+# This is your sidebar TOC. The sidebar code loops through sections here and provides the appropriate formatting.
+
+entries:
+- title: sidebar
+  product: RISC-V Vector Processor Documentation
+  version: 
+  folders:
+  
+  - title: General
+    output: web
+    folderitems:
+    
+    - title: FYP Overview
+      url: /index.html
+      output: web
+      
+    - title: Weekly Minutes Reports
+      url: /Weekly-Minutes.html
+      output: web
+      
+
+  - title: Meetings
+    output: web
+    folderitems:
+    
+    - title: Oct. 7th 2020
+      url: /meeting-7-10-2020.html
+      output: web
+      
+  - title: Other
+    output: web
+    folderitems:
+
+    - title: Contributing to the Website
+      url: /Adding_Documentation.html
+      output: web

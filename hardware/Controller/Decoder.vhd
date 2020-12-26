@@ -10,7 +10,8 @@ entity Decoder is
            d_bit31: out STD_LOGIC; -- used for vsetvl,vsetvli instructions
            d_nf : out STD_LOGIC_VECTOR (2 downto 0);
            d_zimm: out STD_LOGIC_VECTOR(10 downto 0);
-           d_mop : out STD_LOGIC_VECTOR (2 downto 0);
+           d_mew : out STD_LOGIC;
+           d_mop : out STD_LOGIC_VECTOR (1 downto 0);
            d_vm : out STD_LOGIC;
            d_vs2_rs2 : out STD_LOGIC_VECTOR (4 downto 0);
            d_rs1 : out STD_LOGIC_VECTOR (4 downto 0);
@@ -26,7 +27,8 @@ architecture Decoder_arch of Decoder is
         d_bit31<=d_vect_inst(31);
         d_nf<=d_vect_inst(31 downto 29);
         d_zimm<= d_vect_inst(30 downto 20);
-        d_mop<=d_vect_inst(28 downto 26);
+        d_mew<=d_vect_inst(28);
+        d_mop<=d_vect_inst(27 downto 26);
         d_vm<=d_vect_inst(25);
         d_vs2_rs2<=d_vect_inst(24 downto 20);
         d_rs1<=d_vect_inst(19 downto 15);
